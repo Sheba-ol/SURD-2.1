@@ -184,6 +184,28 @@
   .del-btn{color:var(--alert);font-size:12.5px;}
   .del-btn:hover{text-decoration:underline;}
   .admin-locked{padding:40px;color:var(--text-dim);}
+  .admin-locked code{word-break:break-all;}
+
+  /* ---- Profile ---- */
+  .profile-wrap{flex:1;overflow-y:auto;padding:32px 34px;max-width:520px;}
+  .profile-avatar-big{
+    width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:30px;font-weight:600;color:#04140C;background:linear-gradient(135deg,#4D7CE8,#4DE8A0);margin-bottom:16px;
+  }
+  .profile-field{margin-bottom:16px;}
+  .profile-field label{font-size:12px;color:var(--text-dim);display:block;margin-bottom:6px;}
+  .profile-field input,.profile-field textarea{
+    width:100%;background:var(--panel-2);border:1px solid var(--border);border-radius:9px;
+    padding:11px 13px;font-size:14px;
+  }
+  .profile-field textarea{min-height:70px;resize:vertical;}
+  .profile-field input:focus,.profile-field textarea:focus{border-color:var(--accent-dim);}
+  .profile-readonly{
+    background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:11px 13px;
+    font-size:13px;color:var(--text-dim);word-break:break-all;
+  }
+  .profile-readonly .mono{color:var(--text);}
+  .profile-save-row{display:flex;gap:10px;align-items:center;margin-top:8px;}
 
   .hidden{display:none !important;}
   input[type=file]{display:none;}
@@ -257,6 +279,7 @@
     <button class="nav-btn active" data-view="feed" title="Feed">⌂</button>
     <button class="nav-btn" data-view="chats" title="Chats">✉</button>
     <button class="nav-btn" data-view="search" title="Search">⌕</button>
+    <button class="nav-btn" data-view="profile" title="Profile">☺</button>
     <button class="nav-btn" data-view="admin" title="Admin">⚙</button>
     <div class="nav-spacer"></div>
     <button class="nav-btn" id="logoutBtn" title="Log out" style="font-size:16px;">⏻</button>
@@ -308,6 +331,7 @@
       <div class="list-scroll" id="searchResults"></div>
     </div>
 
+    <div id="view-profile" class="hidden"></div>
     <div id="view-admin" class="hidden"></div>
   </div>
 
@@ -548,7 +572,7 @@
   }
 
   // ============ NAV ============
-  const views = ['feed','chats','search','admin'];
+  const views = ['feed','chats','search','admin','profile'];
   const navBtns = document.querySelectorAll('.nav-btn[data-view]');
   const mainpane = document.getElementById('mainpane');
   const appEl = document.getElementById('app');
@@ -561,10 +585,11 @@
       if(el) el.classList.toggle('hidden', v!==view);
     });
     appEl.classList.remove('chat-open');
-    if(view==='admin'){
+    if(view==='admin' || view==='profile'){
       mainpane.style.display='none';
-      renderAdmin();
       contextPanel.style.display='flex';
+      if(view==='admin') renderAdmin();
+      if(view==='profile') renderProfile();
     } else {
       mainpane.style.display='flex';
       mainpane.style.flexDirection='column';
@@ -946,11 +971,87 @@
     });
   }
 
+  // ============ PROFILE ============
+  async function renderProfile(){
+    const profile = await getProfile(ME.id) || MY_PROFILE;
+    contextPanel.innerHTML = `
+      <div class="profile-wrap">
+        <div class="pane-title" style="margin-bottom:20px;">Your Profile</div>
+        <div class="profile-avatar-big">${initials(profile?profile.name:'?')}</div>
+
+        <div class="profile-field">
+          <label>Name</label>
+          <input id="profileNameInput" value="${esc(profile?profile.name:'')}">
+        </div>
+        <div class="profile-field">
+          <label>Handle</label>
+          <input id="profileHandleInput" value="${esc(profile?profile.handle:'')}">
+        </div>
+        <div class="profile-field">
+          <label>Bio</label>
+          <textarea id="profileBioInput">${esc(profile?profile.bio:'')}</textarea>
+        </div>
+
+        <div class="profile-save-row">
+          <button class="btn-primary" id="profileSaveBtn">Save changes</button>
+          <span id="profileSaveMsg" style="font-size:12.5px;color:var(--accent);"></span>
+        </div>
+
+        <div style="height:28px;"></div>
+        <div class="pane-title" style="font-size:15px;margin-bottom:12px;">Account details</div>
+        <div class="profile-field">
+          <label>Email</label>
+          <div class="profile-readonly mono">${esc(ME.email||'')}</div>
+        </div>
+        <div class="profile-field">
+          <label>User ID (useful for admin setup / debugging)</label>
+          <div class="profile-readonly mono" id="profileUidBox">${esc(ME.id)}</div>
+          <button class="icon-btn" id="copyUidBtn" style="margin-top:6px;font-size:12px;width:auto;padding:6px 10px;background:var(--panel-2);border-radius:6px;">Copy ID</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('profileSaveBtn').addEventListener('click', async ()=>{
+      const name = document.getElementById('profileNameInput').value.trim();
+      let handle = document.getElementById('profileHandleInput').value.trim();
+      const bio = document.getElementById('profileBioInput').value.trim();
+      const msg = document.getElementById('profileSaveMsg');
+      if(!name || !handle){ msg.style.color='var(--alert)'; msg.innerText='Name and handle are required.'; return; }
+      if(!handle.startsWith('@')) handle = '@'+handle;
+      const {error} = await sb.from('profiles').update({name, handle, bio}).eq('id', ME.id);
+      if(error){ msg.style.color='var(--alert)'; msg.innerText = error.message; return; }
+      delete PROFILES_CACHE[ME.id];
+      MY_PROFILE = await getProfile(ME.id);
+      document.getElementById('myAvatar').innerText = initials(MY_PROFILE.name);
+      document.getElementById('composerAvatar').innerText = initials(MY_PROFILE.name);
+      msg.style.color='var(--accent)'; msg.innerText='Saved ✓';
+      renderProfile();
+      setTimeout(()=>{ const m=document.getElementById('profileSaveMsg'); if(m) m.innerText=''; }, 2500);
+    });
+    document.getElementById('copyUidBtn').addEventListener('click', ()=>{
+      navigator.clipboard.writeText(ME.id).then(()=>toast('User ID copied'));
+    });
+  }
+
   // ============ ADMIN ============
   async function renderAdmin(){
     const {data: adminRow} = await sb.from('admins').select('*').eq('user_id', ME.id).maybeSingle();
     if(!adminRow){
-      contextPanel.innerHTML = `<div class="admin-locked"><div class="pane-title" style="margin-bottom:10px;">Admin Panel</div>Your account isn't an admin. Ask the project owner to run:<br><br><code class="mono" style="background:var(--panel-2);padding:8px 10px;border-radius:6px;display:inline-block;margin-top:8px;">insert into admins (user_id) values ('${ME.id}');</code></div>`;
+      contextPanel.innerHTML = `
+        <div class="admin-locked">
+          <div class="pane-title" style="margin-bottom:10px;">Admin Panel</div>
+          <div style="margin-bottom:14px;">This account isn't an admin yet.</div>
+          <div style="font-size:12px;margin-bottom:6px;">Logged in as</div>
+          <div class="profile-readonly mono" style="margin-bottom:14px;">${esc(ME.email||'')}</div>
+          <div style="font-size:12px;margin-bottom:6px;">Your user ID</div>
+          <div class="profile-readonly mono" style="margin-bottom:14px;">${esc(ME.id)}</div>
+          <div style="font-size:12px;margin-bottom:8px;">To unlock, run this in Supabase SQL Editor:</div>
+          <code class="mono" style="background:var(--panel-2);padding:10px 12px;border-radius:6px;display:block;">insert into admins (user_id) values ('${ME.id}');</code>
+          <button class="icon-btn" id="adminCopyUidBtn" style="margin-top:10px;font-size:12px;width:auto;padding:6px 10px;background:var(--panel-2);border-radius:6px;">Copy this SQL command</button>
+        </div>`;
+      const copyBtn = document.getElementById('adminCopyUidBtn');
+      if(copyBtn) copyBtn.addEventListener('click', ()=>{
+        navigator.clipboard.writeText(`insert into admins (user_id) values ('${ME.id}');`).then(()=>toast('SQL copied'));
+      });
       return;
     }
     const [{count: userCount}, {count: postCount}, {count: msgCount}, {data: reports}] = await Promise.all([
