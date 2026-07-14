@@ -23,6 +23,9 @@
   a{color:inherit;text-decoration:none;}
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
   input,textarea{font-family:inherit;color:var(--text);background:transparent;border:none;outline:none;}
+  svg{display:block;}
+  .icon{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+  .icon-sm{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 
   /* ---- Auth screens ---- */
   #authScreen{
@@ -47,6 +50,7 @@
   .auth-submit{
     width:100%;background:var(--accent);color:#04140C;font-weight:600;font-size:14px;
     padding:12px;border-radius:10px;margin-top:6px;transition:opacity .15s;
+    display:flex;align-items:center;justify-content:center;gap:6px;
   }
   .auth-submit:hover{opacity:.9;}
   .auth-submit:disabled{opacity:.4;cursor:not-allowed;}
@@ -65,23 +69,24 @@
   .auth-back{font-size:12.5px;color:var(--text-dim);margin-bottom:16px;display:inline-block;}
   .auth-back:hover{color:var(--text);}
   .spinner{
-    width:16px;height:16px;border:2px solid rgba(4,20,12,.3);border-top-color:#04140C;
-    border-radius:50%;display:inline-block;animation:spin .7s linear infinite;vertical-align:-3px;margin-right:6px;
+    width:15px;height:15px;border:2px solid rgba(4,20,12,.3);border-top-color:#04140C;
+    border-radius:50%;display:inline-block;animation:spin .7s linear infinite;
   }
   @keyframes spin{to{transform:rotate(360deg);}}
 
-  /* ---- App Shell (same as before) ---- */
+  /* ---- App Shell ---- */
   #app{display:none;height:100vh;width:100vw;}
   #app.visible{display:flex;}
   .navrail{width:76px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:6px;}
   .logo{width:40px;height:40px;border-radius:10px;background:linear-gradient(145deg,var(--accent),var(--accent-dim));display:flex;align-items:center;justify-content:center;font-weight:700;color:#04140C;font-size:16px;margin-bottom:18px;font-family:'Space Grotesk',sans-serif;letter-spacing:-0.5px;}
-  .nav-btn{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--text-dim);transition:all .15s ease;position:relative;}
+  .nav-btn{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--text-dim);transition:all .15s ease;position:relative;}
   .nav-btn:hover{background:var(--panel-2);color:var(--text);}
   .nav-btn.active{background:var(--panel-2);color:var(--accent);}
   .nav-btn.active::before{content:'';position:absolute;left:-20px;top:50%;transform:translateY(-50%);width:3px;height:20px;background:var(--accent);border-radius:2px;}
   .nav-spacer{flex:1;}
   .nav-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#4D7CE8,#4DE8A0);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;color:#04140C;overflow:hidden;}
   .nav-avatar img{width:100%;height:100%;object-fit:cover;}
+  .notif-dot{position:absolute;top:6px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--alert);border:2px solid var(--panel);}
 
   .mainpane{width:400px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;}
   .pane-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
@@ -93,7 +98,7 @@
   .story-avatar{width:100%;height:100%;border-radius:50%;background:var(--panel-2);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;border:2px solid var(--bg);overflow:hidden;}
   .story-avatar img{width:100%;height:100%;object-fit:cover;}
   .story-label{font-size:11px;color:var(--text-dim);max-width:60px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .story-add{width:56px;height:56px;border-radius:50%;border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--text-dim);}
+  .story-add{width:56px;height:56px;border-radius:50%;border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-dim);}
 
   .list-scroll{flex:1;overflow-y:auto;}
 
@@ -101,26 +106,44 @@
   .composer-row{display:flex;gap:12px;}
   .composer textarea{width:100%;resize:none;font-size:14.5px;line-height:1.5;min-height:44px;}
   .composer-actions{display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
-  .icon-btn{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:16px;}
+  .icon-btn{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text-dim);}
   .icon-btn:hover{background:var(--panel-2);color:var(--accent);}
+  .icon-btn-labeled{display:flex;align-items:center;gap:6px;width:auto;padding:6px 12px;font-size:12.5px;background:var(--panel-2);border-radius:16px;}
   .btn-primary{background:var(--accent);color:#04140C;font-weight:600;font-size:13.5px;padding:8px 18px;border-radius:20px;transition:opacity .15s;}
   .btn-primary:hover{opacity:.88;}
   .btn-primary:disabled{opacity:.35;cursor:not-allowed;}
 
+  /* Notification banner */
+  .notif-banner{
+    margin:14px 20px 0;padding:12px 14px;background:rgba(77,232,160,.08);border:1px solid rgba(77,232,160,.25);
+    border-radius:10px;display:flex;gap:10px;align-items:flex-start;
+  }
+  .notif-banner .icon{color:var(--accent);flex-shrink:0;margin-top:1px;}
+  .notif-banner-text{font-size:13px;line-height:1.4;flex:1;}
+  .notif-banner-time{font-size:11px;color:var(--text-dim);margin-top:3px;}
+  .notif-banner-close{color:var(--text-dim);flex-shrink:0;}
+  .notif-banner-close:hover{color:var(--text);}
+
   .post{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;gap:12px;transition:background .1s;}
   .post:hover{background:#111314;}
-  .avatar{width:42px;height:42px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;color:#04140C;overflow:hidden;}
+  .post.admin-post{background:rgba(77,232,160,.04);}
+  .avatar{width:42px;height:42px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;color:#04140C;overflow:hidden;background:linear-gradient(135deg,#4D7CE8,#4DE8A0);}
   .avatar img{width:100%;height:100%;object-fit:cover;}
   .post-body{flex:1;min-width:0;}
   .post-head{display:flex;align-items:baseline;gap:6px;font-size:14px;flex-wrap:wrap;}
   .post-name{font-weight:600;}
+  .admin-badge{
+    display:inline-flex;align-items:center;gap:3px;background:var(--accent);color:#04140C;
+    font-size:10px;font-weight:700;padding:2px 6px;border-radius:5px;letter-spacing:.3px;
+  }
   .post-handle,.post-time{color:var(--text-dim);font-size:13px;}
   .post-text{margin-top:4px;font-size:14.5px;line-height:1.5;white-space:pre-wrap;word-break:break-word;}
   .post-media{margin-top:10px;border-radius:12px;max-width:100%;max-height:340px;object-fit:cover;border:1px solid var(--border);display:block;}
-  .post-actions{display:flex;gap:28px;margin-top:12px;}
+  .post-actions{display:flex;gap:26px;margin-top:12px;}
   .post-action{display:flex;align-items:center;gap:6px;color:var(--text-dim);font-size:13px;}
   .post-action:hover{color:var(--accent);}
   .post-action.liked{color:var(--alert);}
+  .post-action.liked .icon{fill:var(--alert);stroke:var(--alert);}
 
   .context-panel{flex:1;display:flex;flex-direction:column;min-width:0;}
 
@@ -143,10 +166,12 @@
   .msg-time{font-size:10.5px;color:var(--text-dim);margin-top:4px;display:block;}
   .thread-input{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center;}
   .thread-input input{flex:1;background:var(--panel-2);border-radius:22px;padding:11px 16px;font-size:14px;}
-  .send-btn{width:40px;height:40px;border-radius:50%;background:var(--accent);color:#04140C;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+  .send-btn{width:40px;height:40px;border-radius:50%;background:var(--accent);color:#04140C;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .send-btn .icon{margin-left:2px;}
   .send-btn:disabled{opacity:.3;}
 
   .empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-dim);gap:10px;padding:40px;text-align:center;}
+  .empty-state .icon-xl{width:38px;height:38px;stroke:var(--text-dim);stroke-width:1.4;}
   .empty-state .display{font-size:20px;color:var(--text);}
 
   .story-viewer{position:fixed;inset:0;background:#000;z-index:200;display:flex;align-items:center;justify-content:center;}
@@ -155,15 +180,15 @@
   .story-bar{flex:1;height:3px;background:rgba(255,255,255,.25);border-radius:2px;overflow:hidden;}
   .story-bar-fill{height:100%;background:#fff;width:0%;}
   .story-view-head{display:flex;align-items:center;gap:10px;padding:12px;}
-  .story-view-content{flex:1;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center;font-size:18px;font-family:'Space Grotesk',sans-serif;position:relative;}
+  .story-view-content{flex:1;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center;font-size:18px;font-family:'Space Grotesk',sans-serif;position:relative;color:#fff;}
   .story-view-content img,.story-view-content video{max-width:100%;max-height:100%;border-radius:8px;}
-  .story-close{position:absolute;top:14px;right:14px;font-size:22px;color:#fff;z-index:5;}
+  .story-close{position:absolute;top:14px;right:14px;color:#fff;z-index:5;}
 
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:150;}
-  .modal{background:var(--panel);border:1px solid var(--border);border-radius:14px;width:420px;max-width:90vw;padding:22px;}
+  .modal{background:var(--panel);border:1px solid var(--border);border-radius:14px;width:420px;max-width:90vw;padding:22px;max-height:86vh;overflow-y:auto;}
   .modal h3{font-family:'Space Grotesk',sans-serif;margin-bottom:14px;}
   .modal textarea{width:100%;background:var(--panel-2);border-radius:10px;padding:12px;font-size:14px;min-height:90px;margin-bottom:14px;}
-  .modal-actions{display:flex;justify-content:flex-end;gap:10px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px;}
   .btn-ghost{padding:8px 16px;border-radius:20px;color:var(--text-dim);font-size:13.5px;}
   .btn-ghost:hover{background:var(--panel-2);color:var(--text);}
 
@@ -183,15 +208,23 @@
   .badge.warn{background:rgba(255,92,77,.15);color:var(--alert);}
   .del-btn{color:var(--alert);font-size:12.5px;}
   .del-btn:hover{text-decoration:underline;}
-  .admin-locked{padding:40px;color:var(--text-dim);}
-  .admin-locked code{word-break:break-all;}
+  .broadcast-box{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:26px;}
+  .broadcast-box textarea{width:100%;background:var(--panel-2);border-radius:9px;padding:11px 13px;font-size:14px;min-height:70px;margin-bottom:10px;}
 
   /* ---- Profile ---- */
   .profile-wrap{flex:1;overflow-y:auto;padding:32px 34px;max-width:520px;}
   .profile-avatar-big{
     width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-size:30px;font-weight:600;color:#04140C;background:linear-gradient(135deg,#4D7CE8,#4DE8A0);margin-bottom:16px;
+    font-size:30px;font-weight:600;color:#04140C;background:linear-gradient(135deg,#4D7CE8,#4DE8A0);
+    overflow:hidden;position:relative;flex-shrink:0;
   }
+  .profile-avatar-big img{width:100%;height:100%;object-fit:cover;}
+  .avatar-edit-row{display:flex;align-items:center;gap:16px;margin-bottom:22px;}
+  .avatar-edit-btn{
+    display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:18px;background:var(--panel-2);
+    border:1px solid var(--border);font-size:13px;color:var(--text);
+  }
+  .avatar-edit-btn:hover{border-color:var(--accent-dim);}
   .profile-field{margin-bottom:16px;}
   .profile-field label{font-size:12px;color:var(--text-dim);display:block;margin-bottom:6px;}
   .profile-field input,.profile-field textarea{
@@ -204,7 +237,6 @@
     background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:11px 13px;
     font-size:13px;color:var(--text-dim);word-break:break-all;
   }
-  .profile-readonly .mono{color:var(--text);}
   .profile-save-row{display:flex;gap:10px;align-items:center;margin-top:8px;}
 
   .hidden{display:none !important;}
@@ -221,12 +253,34 @@
 </head>
 <body>
 
+<!-- SVG ICON DEFS -->
+<svg width="0" height="0" style="position:absolute">
+<defs>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9"/></symbol>
+  <symbol id="i-message" viewBox="0 0 24 24"><path d="M4 5.5a1.5 1.5 0 0 1 1.5-1.5h13A1.5 1.5 0 0 1 20 5.5v10a1.5 1.5 0 0 1-1.5 1.5H9l-4.2 3.2a.5.5 0 0 1-.8-.4V17H5.5A1.5 1.5 0 0 1 4 15.5z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.5-4.5"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.2" r="3.4"/><path d="M4.8 19.5c1.1-3.4 4-5.4 7.2-5.4s6.1 2 7.2 5.4"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5 5 6v5.2c0 4.5 3 7.9 7 9.3 4-1.4 7-4.8 7-9.3V6z"/><path d="M9.3 12.1l1.8 1.8 3.6-3.8"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 4H6a1.5 1.5 0 0 0-1.5 1.5v13A1.5 1.5 0 0 0 6 20h3"/><path d="M15 16l4-4-4-4"/><path d="M19 12H9"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="8.3" cy="9.3" r="1.6"/><path d="M20.5 15.5l-5-5-9 9"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10.5l5-3v9l-5-3z"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-9.9-9.4C.6 7.1 2.4 4 5.8 4c2 0 3.4 1.1 4.2 2.4C10.8 5.1 12.2 4 14.2 4c3.4 0 5.2 3.1 3.7 6.6C15.5 15.4 12 20 12 20z"/></symbol>
+  <symbol id="i-comment" viewBox="0 0 24 24"><path d="M4 5.5a1.5 1.5 0 0 1 1.5-1.5h13A1.5 1.5 0 0 1 20 5.5v10a1.5 1.5 0 0 1-1.5 1.5H9l-4.2 3.2a.5.5 0 0 1-.8-.4V17H5.5A1.5 1.5 0 0 1 4 15.5z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3 10.5 13.5"/><path d="M21 3l-6.5 18-4-8-8-4z"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5 5 19"/></symbol>
+  <symbol id="i-paperclip" viewBox="0 0 24 24"><path d="M17.5 8.5 9.9 16a3 3 0 0 1-4.2-4.2l8.6-8.6a2 2 0 0 1 2.9 2.9l-8.2 8.2a1 1 0 0 1-1.5-1.5l7.1-7.1"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 1 1 12 0c0 4 1.5 5.5 1.5 5.5H4.5S6 13 6 9z"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7l1.5-2.5h5L16 7"/><circle cx="12" cy="13.5" r="3.4"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M6.5 7l1 12a1.5 1.5 0 0 0 1.5 1.4h6a1.5 1.5 0 0 0 1.5-1.4l1-12"/></symbol>
+</defs>
+</svg>
+
 <!-- ============ AUTH SCREEN ============ -->
 <div id="authScreen">
   <div class="auth-card">
     <div class="auth-logo">S</div>
 
-    <!-- LOGIN FORM -->
     <div id="formLogin">
       <div class="auth-title">Welcome back</div>
       <div class="auth-sub">Log in to your SURD account.</div>
@@ -238,7 +292,6 @@
       <div class="auth-switch">No account? <button id="showSignup">Sign up</button></div>
     </div>
 
-    <!-- SIGNUP FORM -->
     <div id="formSignup" class="hidden">
       <div class="auth-title">Create your account</div>
       <div class="auth-sub">Join SURD — feed and chat, one place.</div>
@@ -251,7 +304,6 @@
       <div class="auth-switch">Already have an account? <button id="showLogin">Log in</button></div>
     </div>
 
-    <!-- FORGOT PASSWORD FORM -->
     <div id="formForgot" class="hidden">
       <button class="auth-back" id="backFromForgot">← Back</button>
       <div class="auth-title">Reset your password</div>
@@ -261,7 +313,6 @@
       <button class="auth-submit" id="forgotBtn">Send reset link</button>
     </div>
 
-    <!-- SET NEW PASSWORD FORM (after clicking email link) -->
     <div id="formReset" class="hidden">
       <div class="auth-title">Set a new password</div>
       <div class="auth-sub">Choose a new password for your account.</div>
@@ -276,22 +327,22 @@
 <div id="app">
   <div class="navrail">
     <div class="logo">S</div>
-    <button class="nav-btn active" data-view="feed" title="Feed">⌂</button>
-    <button class="nav-btn" data-view="chats" title="Chats">✉</button>
-    <button class="nav-btn" data-view="search" title="Search">⌕</button>
-    <button class="nav-btn" data-view="profile" title="Profile">☺</button>
-    <button class="nav-btn" data-view="admin" title="Admin">⚙</button>
+    <button class="nav-btn active" data-view="feed" title="Home"><svg class="icon"><use href="#i-home"/></svg></button>
+    <button class="nav-btn" data-view="chats" title="Messages"><svg class="icon"><use href="#i-message"/></svg></button>
+    <button class="nav-btn" data-view="search" title="Search"><svg class="icon"><use href="#i-search"/></svg></button>
+    <button class="nav-btn" data-view="profile" title="Profile"><svg class="icon"><use href="#i-user"/></svg></button>
+    <button class="nav-btn hidden" id="adminNavBtn" data-view="admin" title="Admin"><svg class="icon"><use href="#i-shield"/></svg></button>
     <div class="nav-spacer"></div>
-    <button class="nav-btn" id="logoutBtn" title="Log out" style="font-size:16px;">⏻</button>
+    <button class="nav-btn" id="logoutBtn" title="Log out"><svg class="icon"><use href="#i-logout"/></svg></button>
     <div class="nav-avatar" id="myAvatar">Y</div>
   </div>
 
   <div class="mainpane" id="mainpane">
     <div id="view-feed">
       <div class="pane-header">
-        <div class="pane-title">Feed</div>
-        <span class="mono" style="font-size:11px;color:var(--text-dim)">LIVE</span>
+        <div class="pane-title">Home</div>
       </div>
+      <div id="notifBannerWrap"></div>
       <div class="stories-rail" id="storiesRail"></div>
       <div class="composer">
         <div class="composer-row">
@@ -304,8 +355,8 @@
         </div>
         <div class="composer-actions">
           <div style="display:flex;gap:4px;">
-            <button class="icon-btn" id="attachImgBtn" title="Add image">🖼</button>
-            <button class="icon-btn" id="attachVidBtn" title="Add video">🎬</button>
+            <button class="icon-btn" id="attachImgBtn" title="Add image"><svg class="icon"><use href="#i-image"/></svg></button>
+            <button class="icon-btn" id="attachVidBtn" title="Add video"><svg class="icon"><use href="#i-video"/></svg></button>
             <input type="file" id="postImgInput" accept="image/*">
             <input type="file" id="postVidInput" accept="video/*">
           </div>
@@ -318,7 +369,7 @@
     <div id="view-chats" class="hidden" style="display:flex;flex-direction:column;height:100%;">
       <div class="pane-header">
         <div class="pane-title">Messages</div>
-        <button class="icon-btn" id="newChatBtn" title="New chat">✎</button>
+        <button class="icon-btn" id="newChatBtn" title="New chat"><svg class="icon"><use href="#i-plus"/></svg></button>
       </div>
       <div class="list-scroll" id="chatListEl"></div>
     </div>
@@ -331,13 +382,12 @@
       <div class="list-scroll" id="searchResults"></div>
     </div>
 
-    <div id="view-profile" class="hidden"></div>
     <div id="view-admin" class="hidden"></div>
   </div>
 
   <div class="context-panel" id="contextPanel">
     <div class="empty-state">
-      <div style="font-size:34px;">💬</div>
+      <svg class="icon-xl"><use href="#i-message"/></svg>
       <div class="display">Select a chat</div>
       <div style="font-size:13px;max-width:240px;">Pick a conversation on the left, or start a new one to begin chatting.</div>
     </div>
@@ -349,8 +399,8 @@
     <h3 class="display">Add to your story</h3>
     <textarea id="storyText" placeholder="Say something for 24 hours…"></textarea>
     <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <button class="icon-btn" id="storyAttachImgBtn">🖼 Image</button>
-      <button class="icon-btn" id="storyAttachVidBtn">🎬 Video</button>
+      <button class="icon-btn icon-btn-labeled" id="storyAttachImgBtn"><svg class="icon-sm"><use href="#i-image"/></svg>Image</button>
+      <button class="icon-btn icon-btn-labeled" id="storyAttachVidBtn"><svg class="icon-sm"><use href="#i-video"/></svg>Video</button>
       <input type="file" id="storyImgInput" accept="image/*">
       <input type="file" id="storyVidInput" accept="video/*">
     </div>
@@ -373,7 +423,7 @@
 
 <div class="story-viewer hidden" id="storyViewer">
   <div class="story-viewer-inner">
-    <button class="story-close" id="storyViewerClose">✕</button>
+    <button class="story-close" id="storyViewerClose"><svg class="icon"><use href="#i-close"/></svg></button>
     <div class="story-bars" id="storyBars"></div>
     <div class="story-view-head">
       <div class="avatar" id="storyViewAvatar" style="width:32px;height:32px;font-size:13px;"></div>
@@ -390,14 +440,14 @@
 (function(){
   "use strict";
 
-  // ============ SUPABASE CONFIG ============
   const SUPABASE_URL = 'https://ellmwywjteglahnnvhmt.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsbG13eXdqdGVnbGFobm52aG10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NzQxNjMsImV4cCI6MjA5OTU1MDE2M30.s8cm-tE40jB3xviyoWIXcO15VWZcGlt9DM-n68_dUp4';
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  let ME = null;       // auth user
+  let ME = null;
   let MY_PROFILE = null;
-  let PROFILES_CACHE = {}; // id -> profile
+  let IS_ADMIN = false;
+  let PROFILES_CACHE = {};
   let activeChatId = null;
   let chatSub = null;
 
@@ -418,8 +468,12 @@
     return new Date(ts).toLocaleDateString();
   }
   function fmtTime(ts){ return new Date(ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }
-  function emptyStateHTML(icon,title,sub){
-    return `<div class="empty-state"><div style="font-size:34px;">${icon}</div><div class="display">${esc(title)}</div><div style="font-size:13px;max-width:240px;">${esc(sub)}</div></div>`;
+  function emptyStateHTML(iconId,title,sub){
+    return `<div class="empty-state"><svg class="icon-xl"><use href="#${iconId}"/></svg><div class="display">${esc(title)}</div><div style="font-size:13px;max-width:240px;">${esc(sub)}</div></div>`;
+  }
+  function avatarInner(profile){
+    if(profile && profile.avatar_url) return `<img src="${profile.avatar_url}">`;
+    return initials(profile ? profile.name : '?');
   }
 
   async function getProfile(userId){
@@ -428,17 +482,11 @@
     if(data) PROFILES_CACHE[userId] = data;
     return data;
   }
-  function avatarHTML(profile){
-    if(!profile) return initials('?');
-    return initials(profile.name);
-  }
 
   // ============ AUTH FORM SWITCHING ============
   const forms = ['Login','Signup','Forgot','Reset'];
   function showForm(name){
-    forms.forEach(f=>{
-      document.getElementById('form'+f).classList.toggle('hidden', f!==name);
-    });
+    forms.forEach(f=>{ document.getElementById('form'+f).classList.toggle('hidden', f!==name); });
   }
   document.getElementById('showSignup').addEventListener('click', ()=>showForm('Signup'));
   document.getElementById('showLogin').addEventListener('click', ()=>showForm('Login'));
@@ -455,7 +503,6 @@
     btn.innerHTML = loading ? `<span class="spinner"></span>Working…` : label;
   }
 
-  // ---- Sign up ----
   document.getElementById('signupBtn').addEventListener('click', async ()=>{
     const name = document.getElementById('signupName').value.trim();
     let handle = document.getElementById('signupHandle').value.trim();
@@ -466,23 +513,17 @@
     if(password.length < 6){ setMsg('signupMsg','Password must be at least 6 characters.','error'); return; }
     if(!handle) handle = '@'+email.split('@')[0];
     if(!handle.startsWith('@')) handle = '@'+handle;
-
     const btn = document.getElementById('signupBtn');
     setLoading(btn, true);
-    const {data, error} = await sb.auth.signUp({
-      email, password,
-      options: { data: { name, handle } }
-    });
+    const {data, error} = await sb.auth.signUp({ email, password, options: { data: { name, handle } } });
     setLoading(btn, false, 'Sign up');
     if(error){ setMsg('signupMsg', error.message, 'error'); return; }
     if(data.user && !data.session){
       setMsg('signupMsg','Account created! Check your email to confirm, then log in.','success');
       setTimeout(()=>showForm('Login'), 2500);
     }
-    // if session exists (email confirmation disabled), onAuthStateChange will handle it
   });
 
-  // ---- Log in ----
   document.getElementById('loginBtn').addEventListener('click', async ()=>{
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
@@ -495,22 +536,18 @@
     if(error){ setMsg('loginMsg', error.message, 'error'); return; }
   });
 
-  // ---- Forgot password ----
   document.getElementById('forgotBtn').addEventListener('click', async ()=>{
     const email = document.getElementById('forgotEmail').value.trim();
     setMsg('forgotMsg','');
     if(!email){ setMsg('forgotMsg','Enter your email address.','error'); return; }
     const btn = document.getElementById('forgotBtn');
     setLoading(btn, true);
-    const {error} = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + window.location.pathname
-    });
+    const {error} = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
     setLoading(btn, false, 'Send reset link');
     if(error){ setMsg('forgotMsg', error.message, 'error'); return; }
     setMsg('forgotMsg','Check your email for a reset link.','success');
   });
 
-  // ---- Reset password (arrives via emailed link with recovery token) ----
   document.getElementById('resetBtn').addEventListener('click', async ()=>{
     const password = document.getElementById('resetPassword').value;
     setMsg('resetMsg','');
@@ -524,7 +561,6 @@
     setTimeout(()=>{ window.location.href = window.location.origin + window.location.pathname; }, 1500);
   });
 
-  // Detect password-recovery link landing
   sb.auth.onAuthStateChange((event, session)=>{
     if(event === 'PASSWORD_RECOVERY'){
       document.getElementById('authScreen').style.display='flex';
@@ -533,24 +569,18 @@
     }
   });
 
-  document.getElementById('logoutBtn').addEventListener('click', async ()=>{
-    await sb.auth.signOut();
-  });
+  document.getElementById('logoutBtn').addEventListener('click', async ()=>{ await sb.auth.signOut(); });
 
-  // ============ AUTH STATE -> APP BOOT ============
   sb.auth.onAuthStateChange((event, session)=>{
     if(event==='SIGNED_IN' || event==='INITIAL_SESSION'){
-      if(session && session.user){
-        bootApp(session.user);
-      } else if(event==='INITIAL_SESSION'){
-        document.getElementById('authScreen').style.display='flex';
-      }
+      if(session && session.user){ bootApp(session.user); }
+      else if(event==='INITIAL_SESSION'){ document.getElementById('authScreen').style.display='flex'; }
     }
     if(event==='SIGNED_OUT'){
       document.getElementById('app').classList.remove('visible');
       document.getElementById('authScreen').style.display='flex';
       showForm('Login');
-      ME = null; MY_PROFILE = null; PROFILES_CACHE = {};
+      ME = null; MY_PROFILE = null; PROFILES_CACHE = {}; IS_ADMIN = false;
     }
   });
 
@@ -558,17 +588,27 @@
     ME = user;
     let profile = await getProfile(user.id);
     if(!profile){
-      // fallback: trigger may not have fired yet, wait briefly and retry
       await new Promise(r=>setTimeout(r,700));
       profile = await getProfile(user.id);
     }
     MY_PROFILE = profile;
+
+    const {data: adminRow} = await sb.from('admins').select('*').eq('user_id', ME.id).maybeSingle();
+    IS_ADMIN = !!adminRow;
+    document.getElementById('adminNavBtn').classList.toggle('hidden', !IS_ADMIN);
+
     document.getElementById('authScreen').style.display='none';
     document.getElementById('app').classList.add('visible');
-    document.getElementById('myAvatar').innerText = initials(MY_PROFILE ? MY_PROFILE.name : 'Y');
-    document.getElementById('composerAvatar').innerText = initials(MY_PROFILE ? MY_PROFILE.name : 'Y');
-    await Promise.all([renderFeed(), renderStories(), renderChatList()]);
+    updateMyAvatarUI();
+    await Promise.all([renderFeed(), renderStories(), renderChatList(), renderNotifBanner()]);
     setActiveView('feed');
+  }
+
+  function updateMyAvatarUI(){
+    const nav = document.getElementById('myAvatar');
+    const comp = document.getElementById('composerAvatar');
+    const inner = avatarInner(MY_PROFILE);
+    nav.innerHTML = inner; comp.innerHTML = inner;
   }
 
   // ============ NAV ============
@@ -579,6 +619,7 @@
   const contextPanel = document.getElementById('contextPanel');
 
   function setActiveView(view){
+    if(view==='admin' && !IS_ADMIN){ view='feed'; }
     navBtns.forEach(b=>b.classList.toggle('active', b.dataset.view===view));
     views.forEach(v=>{
       const el = document.getElementById('view-'+v);
@@ -594,27 +635,56 @@
       mainpane.style.display='flex';
       mainpane.style.flexDirection='column';
       if(view==='feed'){
-        contextPanel.innerHTML = emptyStateHTML('💬','Select a chat','Pick a conversation from Messages, or open a profile to see more.');
+        contextPanel.innerHTML = emptyStateHTML('i-message','Select a chat','Pick a conversation from Messages, or open a profile to see more.');
       }
       if(view==='chats'){
         renderChatList();
-        if(!activeChatId) contextPanel.innerHTML = emptyStateHTML('💬','Select a chat','Pick a conversation on the left, or start a new one to begin chatting.');
+        if(!activeChatId) contextPanel.innerHTML = emptyStateHTML('i-message','Select a chat','Pick a conversation on the left, or start a new one to begin chatting.');
       }
-      if(view==='search'){
-        renderSearch('');
-      }
+      if(view==='search'){ renderSearch(''); }
     }
   }
   navBtns.forEach(b=>b.addEventListener('click', ()=>setActiveView(b.dataset.view)));
 
-  // ============ MEDIA UPLOAD HELPER ============
-  async function uploadMedia(file){
+  async function uploadMedia(file, folder){
     const ext = file.name.split('.').pop();
-    const path = `${ME.id}/${Date.now()}.${ext}`;
+    const path = `${folder||ME.id}/${Date.now()}.${ext}`;
     const {error} = await sb.storage.from('media').upload(path, file);
     if(error){ toast('Upload failed: '+error.message); return null; }
     const {data} = sb.storage.from('media').getPublicUrl(path);
     return data.publicUrl;
+  }
+
+  // ============ NOTIFICATIONS (broadcasts) ============
+  async function renderNotifBanner(){
+    const wrap = document.getElementById('notifBannerWrap');
+    const dismissed = JSON.parse(localStorage.getItem('surd_dismissed_notifs')||'[]');
+    const {data: notifs} = await sb.from('notifications').select('*').order('created_at',{ascending:false}).limit(3);
+    wrap.innerHTML='';
+    let hasUnseen = false;
+    (notifs||[]).forEach(n=>{
+      if(!dismissed.includes(n.id)) hasUnseen = true;
+      if(dismissed.includes(n.id)) return;
+      const div = document.createElement('div');
+      div.className='notif-banner';
+      div.innerHTML = `
+        <svg class="icon"><use href="#i-bell"/></svg>
+        <div class="notif-banner-text">${esc(n.message)}<div class="notif-banner-time">${timeAgo(n.created_at)}</div></div>
+        <button class="notif-banner-close" data-dismiss="${n.id}"><svg class="icon-sm"><use href="#i-close"/></svg></button>
+      `;
+      wrap.appendChild(div);
+    });
+    wrap.querySelectorAll('[data-dismiss]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const d = JSON.parse(localStorage.getItem('surd_dismissed_notifs')||'[]');
+        d.push(btn.dataset.dismiss);
+        localStorage.setItem('surd_dismissed_notifs', JSON.stringify(d));
+        renderNotifBanner();
+      });
+    });
+    document.getElementById('adminNavBtn'); // noop keep ref
+    const dot = document.querySelector('.notif-dot');
+    if(dot) dot.remove();
   }
 
   // ============ FEED ============
@@ -653,10 +723,7 @@
     postSubmitBtn.disabled = true;
     postSubmitBtn.innerText = 'Posting…';
     let mediaUrl = null, mediaType = null;
-    if(pendingFile){
-      mediaUrl = await uploadMedia(pendingFile);
-      mediaType = pendingType;
-    }
+    if(pendingFile){ mediaUrl = await uploadMedia(pendingFile); mediaType = pendingType; }
     const {error} = await sb.from('posts').insert({user_id: ME.id, text, media_url: mediaUrl, media_type: mediaType});
     postSubmitBtn.innerText = 'Post';
     if(error){ toast('Post failed: '+error.message); postSubmitBtn.disabled=false; return; }
@@ -669,20 +736,20 @@
 
   async function renderFeed(){
     const {data: posts, error} = await sb.from('posts').select('*').order('created_at', {ascending:false}).limit(50);
-    if(error){ feedList.innerHTML = emptyStateHTML('⚠','Could not load feed', error.message); return; }
-    const {data: {user}} = await sb.auth.getUser();
+    if(error){ feedList.innerHTML = emptyStateHTML('i-home','Could not load feed', error.message); return; }
     const {data: likes} = await sb.from('likes').select('*');
     feedList.innerHTML='';
     if(!posts || posts.length===0){
-      feedList.innerHTML = emptyStateHTML('📭','No posts yet','Be the first to post something.');
+      feedList.innerHTML = emptyStateHTML('i-home','No posts yet','Be the first to post something.');
       return;
     }
     for(const p of posts){
       const profile = await getProfile(p.user_id);
       const myLikes = (likes||[]).filter(l=>l.post_id===p.id);
       const liked = myLikes.some(l=>l.user_id===ME.id);
+      const {data: authorAdmin} = await sb.from('admins').select('user_id').eq('user_id', p.user_id).maybeSingle();
       const div = document.createElement('div');
-      div.className='post';
+      div.className='post' + (authorAdmin ? ' admin-post' : '');
       let mediaHTML = '';
       if(p.media_url){
         mediaHTML = p.media_type==='video'
@@ -690,17 +757,18 @@
           : `<img class="post-media" src="${p.media_url}">`;
       }
       div.innerHTML = `
-        <div class="avatar">${initials(profile?profile.name:'?')}</div>
+        <div class="avatar">${avatarInner(profile)}</div>
         <div class="post-body">
           <div class="post-head">
             <span class="post-name">${esc(profile?profile.name:'Unknown')}</span>
+            ${authorAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
             <span class="post-handle mono">${esc(profile?profile.handle:'')}</span>
             <span class="post-time mono">· ${timeAgo(p.created_at)}</span>
           </div>
           ${p.text ? `<div class="post-text">${esc(p.text)}</div>` : ''}
           ${mediaHTML}
           <div class="post-actions">
-            <div class="post-action ${liked?'liked':''}" data-like="${p.id}">${liked?'❤️':'🤍'} <span>${myLikes.length}</span></div>
+            <div class="post-action ${liked?'liked':''}" data-like="${p.id}"><svg class="icon-sm"><use href="#i-heart"/></svg><span>${myLikes.length}</span></div>
           </div>
         </div>
       `;
@@ -710,11 +778,8 @@
       el.addEventListener('click', async ()=>{
         const id = el.dataset.like;
         const isLiked = el.classList.contains('liked');
-        if(isLiked){
-          await sb.from('likes').delete().eq('post_id', id).eq('user_id', ME.id);
-        } else {
-          await sb.from('likes').insert({post_id:id, user_id:ME.id});
-        }
+        if(isLiked){ await sb.from('likes').delete().eq('post_id', id).eq('user_id', ME.id); }
+        else { await sb.from('likes').insert({post_id:id, user_id:ME.id}); }
         renderFeed();
       });
     });
@@ -741,7 +806,7 @@
     storiesRail.innerHTML='';
     const addDiv = document.createElement('div');
     addDiv.className='story';
-    addDiv.innerHTML = `<div class="story-add">＋</div><div class="story-label">Your story</div>`;
+    addDiv.innerHTML = `<div class="story-add"><svg class="icon"><use href="#i-plus"/></svg></div><div class="story-label">Your story</div>`;
     addDiv.addEventListener('click', ()=>{ storyText.value=''; pendingStoryFile=null; storyModal.classList.remove('hidden'); });
     storiesRail.appendChild(addDiv);
 
@@ -751,7 +816,7 @@
       const profile = await getProfile(uid);
       const div = document.createElement('div');
       div.className='story';
-      div.innerHTML = `<div class="story-ring"><div class="story-avatar">${initials(profile?profile.name:'?')}</div></div><div class="story-label">${uid===ME.id?'You':esc(profile?profile.name.split(' ')[0]:'')}</div>`;
+      div.innerHTML = `<div class="story-ring"><div class="story-avatar">${avatarInner(profile)}</div></div><div class="story-label">${uid===ME.id?'You':esc(profile?profile.name.split(' ')[0]:'')}</div>`;
       div.addEventListener('click', ()=>openStoryViewer(byUser[uid]));
       storiesRail.appendChild(div);
     }
@@ -778,14 +843,12 @@
       if(idx>=list.length){ closeViewer(); return; }
       const s = list[idx];
       const profile = await getProfile(s.user_id);
-      document.getElementById('storyViewAvatar').innerText = initials(profile?profile.name:'?');
+      document.getElementById('storyViewAvatar').innerHTML = avatarInner(profile);
       document.getElementById('storyViewName').innerText = profile?profile.name:'Unknown';
       document.getElementById('storyViewTime').innerText = timeAgo(s.created_at);
       let contentHTML = s.text ? esc(s.text) : '';
       if(s.media_url){
-        contentHTML = s.media_type==='video'
-          ? `<video src="${s.media_url}" autoplay muted></video>`
-          : `<img src="${s.media_url}">`;
+        contentHTML = s.media_type==='video' ? `<video src="${s.media_url}" autoplay muted></video>` : `<img src="${s.media_url}">`;
       }
       document.getElementById('storyViewContent').innerHTML = contentHTML;
       const fills = bars.querySelectorAll('.story-bar-fill');
@@ -817,7 +880,7 @@
     const {data: chats} = await sb.from('chats').select('*').or(`user_a.eq.${ME.id},user_b.eq.${ME.id}`);
     chatListEl.innerHTML='';
     if(!chats || chats.length===0){
-      chatListEl.innerHTML = emptyStateHTML('✉','No chats yet','Start a new conversation to begin messaging.');
+      chatListEl.innerHTML = emptyStateHTML('i-message','No chats yet','Start a new conversation to begin messaging.');
       return;
     }
     for(const c of chats){
@@ -828,13 +891,13 @@
       const div = document.createElement('div');
       div.className = 'chat-list-item' + (activeChatId===c.id ? ' active':'');
       div.innerHTML = `
-        <div class="avatar">${initials(profile?profile.name:'?')}</div>
+        <div class="avatar">${avatarInner(profile)}</div>
         <div class="chat-meta">
           <div class="chat-top-row">
             <div class="chat-name">${esc(profile?profile.name:'Unknown')}</div>
             <div class="mono" style="font-size:11px;color:var(--text-dim)">${lm?timeAgo(lm.created_at):''}</div>
           </div>
-          <div class="chat-preview">${lm ? esc(lm.text || (lm.media_type==='video'?'📹 Video':'📷 Photo')) : 'No messages yet'}</div>
+          <div class="chat-preview">${lm ? esc(lm.text || (lm.media_type==='video'?'Video':'Photo')) : 'No messages yet'}</div>
         </div>
       `;
       div.addEventListener('click', ()=>openChat(c.id, otherId));
@@ -848,7 +911,7 @@
     const profile = await getProfile(otherId);
     contextPanel.innerHTML = `
       <div class="thread-header">
-        <div class="avatar">${initials(profile?profile.name:'?')}</div>
+        <div class="avatar">${avatarInner(profile)}</div>
         <div>
           <div style="font-weight:600;font-size:14.5px;">${esc(profile?profile.name:'Unknown')}</div>
           <div style="font-size:12px;color:var(--text-dim)">${esc(profile?profile.handle:'')}</div>
@@ -856,10 +919,10 @@
       </div>
       <div class="thread-messages" id="threadMessages"></div>
       <div class="thread-input">
-        <button class="icon-btn" id="chatAttachBtn">📎</button>
+        <button class="icon-btn" id="chatAttachBtn"><svg class="icon"><use href="#i-paperclip"/></svg></button>
         <input type="file" id="chatFileInput" accept="image/*,video/*">
         <input id="chatInput" placeholder="Message ${esc(profile?profile.name.split(' ')[0]:'')}…">
-        <button class="send-btn" id="chatSendBtn" disabled>➤</button>
+        <button class="send-btn" id="chatSendBtn" disabled><svg class="icon"><use href="#i-send"/></svg></button>
       </div>
     `;
     appEl.classList.add('chat-open');
@@ -869,8 +932,7 @@
     if(chatSub) sb.removeChannel(chatSub);
     chatSub = sb.channel('chat-'+chatId)
       .on('postgres_changes', {event:'INSERT', schema:'public', table:'messages', filter:`chat_id=eq.${chatId}`}, ()=>{
-        renderThread(chatId);
-        renderChatList();
+        renderThread(chatId); renderChatList();
       })
       .subscribe();
 
@@ -896,8 +958,7 @@
       const {error} = await sb.from('messages').insert({chat_id:chatId, sender_id:ME.id, text, media_url:mediaUrl, media_type:mediaType});
       if(error){ toast('Send failed: '+error.message); }
       input.value=''; chatPendingFile=null;
-      renderThread(chatId);
-      renderChatList();
+      renderThread(chatId); renderChatList();
     }
     sendBtn.addEventListener('click', send);
     input.addEventListener('keydown', e=>{ if(e.key==='Enter') send(); });
@@ -930,7 +991,7 @@
     (users||[]).forEach(u=>{
       const row = document.createElement('div');
       row.className='chat-list-item'; row.style.borderRadius='8px';
-      row.innerHTML = `<div class="avatar">${initials(u.name)}</div><div class="chat-meta"><div class="chat-name">${esc(u.name)}</div><div class="chat-preview">${esc(u.handle)}</div></div>`;
+      row.innerHTML = `<div class="avatar">${avatarInner(u)}</div><div class="chat-meta"><div class="chat-name">${esc(u.name)}</div><div class="chat-preview">${esc(u.handle)}</div></div>`;
       row.addEventListener('click', async ()=>{
         const chat = await findOrCreateChat(u.id);
         if(!chat) return;
@@ -954,13 +1015,13 @@
     const {data: users} = await query.limit(30);
     searchResults.innerHTML='';
     if(!users || users.length===0){
-      searchResults.innerHTML = emptyStateHTML('⌕','No results','Try a different name or handle.');
+      searchResults.innerHTML = emptyStateHTML('i-search','No results','Try a different name or handle.');
       return;
     }
     users.forEach(u=>{
       const row = document.createElement('div');
       row.className='chat-list-item';
-      row.innerHTML = `<div class="avatar">${initials(u.name)}</div><div class="chat-meta"><div class="chat-name">${esc(u.name)}</div><div class="chat-preview">${esc(u.handle)} · ${esc(u.bio||'')}</div></div>`;
+      row.innerHTML = `<div class="avatar">${avatarInner(u)}</div><div class="chat-meta"><div class="chat-name">${esc(u.name)}</div><div class="chat-preview">${esc(u.handle)} · ${esc(u.bio||'')}</div></div>`;
       row.addEventListener('click', async ()=>{
         const chat = await findOrCreateChat(u.id);
         if(!chat) return;
@@ -977,7 +1038,11 @@
     contextPanel.innerHTML = `
       <div class="profile-wrap">
         <div class="pane-title" style="margin-bottom:20px;">Your Profile</div>
-        <div class="profile-avatar-big">${initials(profile?profile.name:'?')}</div>
+        <div class="avatar-edit-row">
+          <div class="profile-avatar-big" id="profileAvatarBig">${avatarInner(profile)}</div>
+          <button class="avatar-edit-btn" id="changeAvatarBtn"><svg class="icon-sm"><use href="#i-camera"/></svg>Change photo</button>
+          <input type="file" id="avatarInput" accept="image/*">
+        </div>
 
         <div class="profile-field">
           <label>Name</label>
@@ -1003,13 +1068,21 @@
           <label>Email</label>
           <div class="profile-readonly mono">${esc(ME.email||'')}</div>
         </div>
-        <div class="profile-field">
-          <label>User ID (useful for admin setup / debugging)</label>
-          <div class="profile-readonly mono" id="profileUidBox">${esc(ME.id)}</div>
-          <button class="icon-btn" id="copyUidBtn" style="margin-top:6px;font-size:12px;width:auto;padding:6px 10px;background:var(--panel-2);border-radius:6px;">Copy ID</button>
-        </div>
       </div>
     `;
+    document.getElementById('changeAvatarBtn').addEventListener('click', ()=>document.getElementById('avatarInput').click());
+    document.getElementById('avatarInput').addEventListener('change', async e=>{
+      const f = e.target.files[0]; if(!f) return;
+      document.getElementById('profileAvatarBig').innerHTML = `<img src="${URL.createObjectURL(f)}">`;
+      const url = await uploadMedia(f, 'avatars/'+ME.id);
+      if(!url) return;
+      const {error} = await sb.from('profiles').update({avatar_url:url}).eq('id', ME.id);
+      if(error){ toast('Could not save photo: '+error.message); return; }
+      delete PROFILES_CACHE[ME.id];
+      MY_PROFILE = await getProfile(ME.id);
+      updateMyAvatarUI();
+      toast('Profile photo updated');
+    });
     document.getElementById('profileSaveBtn').addEventListener('click', async ()=>{
       const name = document.getElementById('profileNameInput').value.trim();
       let handle = document.getElementById('profileHandleInput').value.trim();
@@ -1021,37 +1094,17 @@
       if(error){ msg.style.color='var(--alert)'; msg.innerText = error.message; return; }
       delete PROFILES_CACHE[ME.id];
       MY_PROFILE = await getProfile(ME.id);
-      document.getElementById('myAvatar').innerText = initials(MY_PROFILE.name);
-      document.getElementById('composerAvatar').innerText = initials(MY_PROFILE.name);
+      updateMyAvatarUI();
       msg.style.color='var(--accent)'; msg.innerText='Saved ✓';
       renderProfile();
       setTimeout(()=>{ const m=document.getElementById('profileSaveMsg'); if(m) m.innerText=''; }, 2500);
-    });
-    document.getElementById('copyUidBtn').addEventListener('click', ()=>{
-      navigator.clipboard.writeText(ME.id).then(()=>toast('User ID copied'));
     });
   }
 
   // ============ ADMIN ============
   async function renderAdmin(){
-    const {data: adminRow} = await sb.from('admins').select('*').eq('user_id', ME.id).maybeSingle();
-    if(!adminRow){
-      contextPanel.innerHTML = `
-        <div class="admin-locked">
-          <div class="pane-title" style="margin-bottom:10px;">Admin Panel</div>
-          <div style="margin-bottom:14px;">This account isn't an admin yet.</div>
-          <div style="font-size:12px;margin-bottom:6px;">Logged in as</div>
-          <div class="profile-readonly mono" style="margin-bottom:14px;">${esc(ME.email||'')}</div>
-          <div style="font-size:12px;margin-bottom:6px;">Your user ID</div>
-          <div class="profile-readonly mono" style="margin-bottom:14px;">${esc(ME.id)}</div>
-          <div style="font-size:12px;margin-bottom:8px;">To unlock, run this in Supabase SQL Editor:</div>
-          <code class="mono" style="background:var(--panel-2);padding:10px 12px;border-radius:6px;display:block;">insert into admins (user_id) values ('${ME.id}');</code>
-          <button class="icon-btn" id="adminCopyUidBtn" style="margin-top:10px;font-size:12px;width:auto;padding:6px 10px;background:var(--panel-2);border-radius:6px;">Copy this SQL command</button>
-        </div>`;
-      const copyBtn = document.getElementById('adminCopyUidBtn');
-      if(copyBtn) copyBtn.addEventListener('click', ()=>{
-        navigator.clipboard.writeText(`insert into admins (user_id) values ('${ME.id}');`).then(()=>toast('SQL copied'));
-      });
+    if(!IS_ADMIN){
+      contextPanel.innerHTML = `<div class="admin-wrap"><div class="pane-title" style="margin-bottom:10px;">Admin Panel</div><div style="color:var(--text-dim);">This account doesn't have admin access.</div></div>`;
       return;
     }
     const [{count: userCount}, {count: postCount}, {count: msgCount}, {data: reports}] = await Promise.all([
@@ -1062,6 +1115,7 @@
     ]);
     const {data: users} = await sb.from('profiles').select('*');
     const {data: posts} = await sb.from('posts').select('*').order('created_at',{ascending:false}).limit(50);
+    const {data: notifs} = await sb.from('notifications').select('*').order('created_at',{ascending:false}).limit(20);
 
     contextPanel.innerHTML = `
       <div class="admin-wrap">
@@ -1072,11 +1126,56 @@
           <div class="stat-card"><div class="stat-num">${msgCount||0}</div><div class="stat-label">Messages sent</div></div>
           <div class="stat-card"><div class="stat-num">${(reports||[]).filter(r=>r.status==='open').length}</div><div class="stat-label">Open reports</div></div>
         </div>
+
+        <div class="admin-section">
+          <h3>Broadcast to all users</h3>
+          <div class="broadcast-box">
+            <textarea id="broadcastText" placeholder="Write an announcement — it'll appear as a notification banner and a post in everyone's feed…"></textarea>
+            <button class="btn-primary" id="broadcastBtn">Send announcement</button>
+            <span id="broadcastMsg" style="font-size:12.5px;color:var(--accent);margin-left:10px;"></span>
+          </div>
+        </div>
+
+        <div class="admin-section">
+          <h3>Past announcements</h3>
+          <table class="admin-table"><thead><tr><th>Message</th><th>Sent</th><th></th></tr></thead><tbody id="adminNotifsBody"></tbody></table>
+        </div>
+
         <div class="admin-section"><h3>Users</h3><table class="admin-table"><thead><tr><th>Name</th><th>Handle</th><th>Joined</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div>
         <div class="admin-section"><h3>Posts</h3><table class="admin-table"><thead><tr><th>Author</th><th>Content</th><th>Posted</th><th></th></tr></thead><tbody id="adminPostsBody"></tbody></table></div>
         <div class="admin-section"><h3>Reports</h3><table class="admin-table"><thead><tr><th>Type</th><th>Target</th><th>Reason</th><th>Status</th><th></th></tr></thead><tbody id="adminReportsBody"></tbody></table></div>
       </div>
     `;
+
+    document.getElementById('broadcastBtn').addEventListener('click', async ()=>{
+      const text = document.getElementById('broadcastText').value.trim();
+      const msg = document.getElementById('broadcastMsg');
+      if(!text){ msg.style.color='var(--alert)'; msg.innerText='Write a message first.'; return; }
+      const {error: nErr} = await sb.from('notifications').insert({message:text, created_by:ME.id});
+      if(nErr){ msg.style.color='var(--alert)'; msg.innerText = nErr.message; return; }
+      await sb.from('posts').insert({user_id:ME.id, text: 'Announcement: '+text, media_url:null, media_type:null});
+      msg.style.color='var(--accent)'; msg.innerText='Sent to all users ✓';
+      document.getElementById('broadcastText').value='';
+      renderAdmin(); renderFeed(); renderNotifBanner();
+    });
+
+    const notifsBody = document.getElementById('adminNotifsBody');
+    if(!notifs || notifs.length===0){
+      notifsBody.innerHTML = `<tr><td colspan="3" style="color:var(--text-dim);">No announcements sent yet.</td></tr>`;
+    } else {
+      notifs.forEach(n=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td style="max-width:280px;">${esc(n.message)}</td><td class="mono">${timeAgo(n.created_at)}</td><td><button class="del-btn" data-delnotif="${n.id}">Delete</button></td>`;
+        notifsBody.appendChild(tr);
+      });
+      notifsBody.querySelectorAll('[data-delnotif]').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          await sb.from('notifications').delete().eq('id', btn.dataset.delnotif);
+          renderAdmin(); renderNotifBanner();
+        });
+      });
+    }
+
     const usersBody = document.getElementById('adminUsersBody');
     (users||[]).forEach(u=>{
       const tr = document.createElement('tr');
