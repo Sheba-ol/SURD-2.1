@@ -767,55 +767,62 @@
     renderFeed();
   });
 
+  let feedRendering = false;
   async function renderFeed(){
-    const {data: posts, error} = await sb.from('posts').select('*').order('created_at', {ascending:false}).limit(50);
-    if(error){ feedList.innerHTML = emptyStateHTML('i-home','Could not load feed', error.message); return; }
-    const {data: likes} = await sb.from('likes').select('*');
-    feedList.innerHTML='';
-    if(!posts || posts.length===0){
-      feedList.innerHTML = emptyStateHTML('i-home','No posts yet','Be the first to post something.');
-      return;
-    }
-    for(const p of posts){
-      const profile = await getProfile(p.user_id);
-      const myLikes = (likes||[]).filter(l=>l.post_id===p.id);
-      const liked = myLikes.some(l=>l.user_id===ME.id);
-      const {data: authorAdmin} = await sb.from('admins').select('user_id').eq('user_id', p.user_id).maybeSingle();
-      const div = document.createElement('div');
-      div.className='post' + (authorAdmin ? ' admin-post' : '');
-      let mediaHTML = '';
-      if(p.media_url){
-        mediaHTML = p.media_type==='video'
-          ? `<video class="post-media" src="${p.media_url}" controls></video>`
-          : `<img class="post-media" src="${p.media_url}">`;
+    if(feedRendering) return;
+    feedRendering = true;
+    try{
+      const {data: posts, error} = await sb.from('posts').select('*').order('created_at', {ascending:false}).limit(50);
+      if(error){ feedList.innerHTML = emptyStateHTML('i-home','Could not load feed', error.message); return; }
+      const {data: likes} = await sb.from('likes').select('*');
+      feedList.innerHTML='';
+      if(!posts || posts.length===0){
+        feedList.innerHTML = emptyStateHTML('i-home','No posts yet','Be the first to post something.');
+        return;
       }
-      div.innerHTML = `
-        <div class="avatar">${avatarInner(profile)}</div>
-        <div class="post-body">
-          <div class="post-head">
-            <span class="post-name">${esc(profile?profile.name:'Unknown')}</span>
-            ${authorAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
-            <span class="post-handle mono">${esc(profile?profile.handle:'')}</span>
-            <span class="post-time mono">· ${timeAgo(p.created_at)}</span>
+      for(const p of posts){
+        const profile = await getProfile(p.user_id);
+        const myLikes = (likes||[]).filter(l=>l.post_id===p.id);
+        const liked = myLikes.some(l=>l.user_id===ME.id);
+        const {data: authorAdmin} = await sb.from('admins').select('user_id').eq('user_id', p.user_id).maybeSingle();
+        const div = document.createElement('div');
+        div.className='post' + (authorAdmin ? ' admin-post' : '');
+        let mediaHTML = '';
+        if(p.media_url){
+          mediaHTML = p.media_type==='video'
+            ? `<video class="post-media" src="${p.media_url}" controls></video>`
+            : `<img class="post-media" src="${p.media_url}">`;
+        }
+        div.innerHTML = `
+          <div class="avatar">${avatarInner(profile)}</div>
+          <div class="post-body">
+            <div class="post-head">
+              <span class="post-name">${esc(profile?profile.name:'Unknown')}</span>
+              ${authorAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
+              <span class="post-handle mono">${esc(profile?profile.handle:'')}</span>
+              <span class="post-time mono">· ${timeAgo(p.created_at)}</span>
+            </div>
+            ${p.text ? `<div class="post-text">${esc(p.text)}</div>` : ''}
+            ${mediaHTML}
+            <div class="post-actions">
+              <div class="post-action ${liked?'liked':''}" data-like="${p.id}"><svg class="icon-sm"><use href="#i-heart"/></svg><span>${myLikes.length}</span></div>
+            </div>
           </div>
-          ${p.text ? `<div class="post-text">${esc(p.text)}</div>` : ''}
-          ${mediaHTML}
-          <div class="post-actions">
-            <div class="post-action ${liked?'liked':''}" data-like="${p.id}"><svg class="icon-sm"><use href="#i-heart"/></svg><span>${myLikes.length}</span></div>
-          </div>
-        </div>
-      `;
-      feedList.appendChild(div);
-    }
-    feedList.querySelectorAll('[data-like]').forEach(el=>{
-      el.addEventListener('click', async ()=>{
-        const id = el.dataset.like;
-        const isLiked = el.classList.contains('liked');
-        if(isLiked){ await sb.from('likes').delete().eq('post_id', id).eq('user_id', ME.id); }
-        else { await sb.from('likes').insert({post_id:id, user_id:ME.id}); }
-        renderFeed();
+        `;
+        feedList.appendChild(div);
+      }
+      feedList.querySelectorAll('[data-like]').forEach(el=>{
+        el.addEventListener('click', async ()=>{
+          const id = el.dataset.like;
+          const isLiked = el.classList.contains('liked');
+          if(isLiked){ await sb.from('likes').delete().eq('post_id', id).eq('user_id', ME.id); }
+          else { await sb.from('likes').insert({post_id:id, user_id:ME.id}); }
+          renderFeed();
+        });
       });
-    });
+    } finally {
+      feedRendering = false;
+    }
   }
 
   // ============ STORIES ============
@@ -909,36 +916,46 @@
     return data;
   }
 
+  let chatListRendering = false;
   async function renderChatList(){
-    const {data: chats} = await sb.from('chats').select('*').or(`user_a.eq.${ME.id},user_b.eq.${ME.id}`);
-    chatListEl.innerHTML='';
-    if(!chats || chats.length===0){
-      chatListEl.innerHTML = emptyStateHTML('i-message','No chats yet','Start a new conversation to begin messaging.');
-      return;
-    }
-    for(const c of chats){
-      const otherId = c.user_a===ME.id ? c.user_b : c.user_a;
-      const profile = await getProfile(otherId);
-      const {data: lastMsgs} = await sb.from('messages').select('*').eq('chat_id', c.id).order('created_at',{ascending:false}).limit(1);
-      const lm = lastMsgs && lastMsgs[0];
-      const div = document.createElement('div');
-      div.className = 'chat-list-item' + (activeChatId===c.id ? ' active':'');
-      div.innerHTML = `
-        <div class="avatar">${avatarInner(profile)}</div>
-        <div class="chat-meta">
-          <div class="chat-top-row">
-            <div class="chat-name">${esc(profile?profile.name:'Unknown')}</div>
-            <div class="mono" style="font-size:11px;color:var(--text-dim)">${lm?timeAgo(lm.created_at):''}</div>
+    if(chatListRendering) return;
+    chatListRendering = true;
+    try{
+      const {data: chats} = await sb.from('chats').select('*').or(`user_a.eq.${ME.id},user_b.eq.${ME.id}`);
+      chatListEl.innerHTML='';
+      if(!chats || chats.length===0){
+        chatListEl.innerHTML = emptyStateHTML('i-message','No chats yet','Start a new conversation to begin messaging.');
+        return;
+      }
+      for(const c of chats){
+        const otherId = c.user_a===ME.id ? c.user_b : c.user_a;
+        const profile = await getProfile(otherId);
+        const {data: lastMsgs} = await sb.from('messages').select('*').eq('chat_id', c.id).order('created_at',{ascending:false}).limit(1);
+        const lm = lastMsgs && lastMsgs[0];
+        const div = document.createElement('div');
+        div.className = 'chat-list-item' + (activeChatId===c.id ? ' active':'');
+        div.innerHTML = `
+          <div class="avatar">${avatarInner(profile)}</div>
+          <div class="chat-meta">
+            <div class="chat-top-row">
+              <div class="chat-name">${esc(profile?profile.name:'Unknown')}</div>
+              <div class="mono" style="font-size:11px;color:var(--text-dim)">${lm?timeAgo(lm.created_at):''}</div>
+            </div>
+            <div class="chat-preview">${lm ? esc(lm.text || (lm.media_type==='video'?'Video':'Photo')) : 'No messages yet'}</div>
           </div>
-          <div class="chat-preview">${lm ? esc(lm.text || (lm.media_type==='video'?'Video':'Photo')) : 'No messages yet'}</div>
-        </div>
-      `;
-      div.addEventListener('click', ()=>openChat(c.id, otherId));
-      chatListEl.appendChild(div);
+        `;
+        div.addEventListener('click', ()=>openChat(c.id, otherId));
+        chatListEl.appendChild(div);
+      }
+    } finally {
+      chatListRendering = false;
     }
   }
 
+  let openingChatId = null;
   async function openChat(chatId, otherId){
+    if(openingChatId === chatId) return;
+    openingChatId = chatId;
     try{
       activeChatId = chatId;
       const profile = await getProfile(otherId);
@@ -960,8 +977,8 @@
       `;
       appEl.classList.add('chat-open');
       contextPanel.style.display='flex';
-      renderChatList();
       await renderThread(chatId);
+      renderChatList();
 
       if(chatSub) sb.removeChannel(chatSub);
       chatSub = sb.channel('chat-'+chatId)
@@ -999,6 +1016,8 @@
     } catch(err){
       toast('Could not open chat: ' + (err.message || 'unknown error'));
       appEl.classList.remove('chat-open');
+    } finally {
+      openingChatId = null;
     }
   }
 
