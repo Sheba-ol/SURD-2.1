@@ -939,62 +939,67 @@
   }
 
   async function openChat(chatId, otherId){
-    activeChatId = chatId;
-    renderChatList();
-    const profile = await getProfile(otherId);
-    contextPanel.innerHTML = `
-      <div class="thread-header">
-        <div class="avatar">${avatarInner(profile)}</div>
-        <div>
-          <div style="font-weight:600;font-size:14.5px;">${esc(profile?profile.name:'Unknown')}</div>
-          <div style="font-size:12px;color:var(--text-dim)">${esc(profile?profile.handle:'')}</div>
+    try{
+      activeChatId = chatId;
+      const profile = await getProfile(otherId);
+      contextPanel.innerHTML = `
+        <div class="thread-header">
+          <div class="avatar">${avatarInner(profile)}</div>
+          <div>
+            <div style="font-weight:600;font-size:14.5px;">${esc(profile?profile.name:'Unknown')}</div>
+            <div style="font-size:12px;color:var(--text-dim)">${esc(profile?profile.handle:'')}</div>
+          </div>
         </div>
-      </div>
-      <div class="thread-messages" id="threadMessages"></div>
-      <div class="thread-input">
-        <button class="icon-btn" id="chatAttachBtn"><svg class="icon"><use href="#i-paperclip"/></svg></button>
-        <input type="file" id="chatFileInput" accept="image/*,video/*">
-        <input id="chatInput" placeholder="Message ${esc(profile?profile.name.split(' ')[0]:'')}…">
-        <button class="send-btn" id="chatSendBtn" disabled><svg class="icon"><use href="#i-send"/></svg></button>
-      </div>
-    `;
-    appEl.classList.add('chat-open');
-    contextPanel.style.display='flex';
-    await renderThread(chatId);
+        <div class="thread-messages" id="threadMessages"></div>
+        <div class="thread-input">
+          <button class="icon-btn" id="chatAttachBtn"><svg class="icon"><use href="#i-paperclip"/></svg></button>
+          <input type="file" id="chatFileInput" accept="image/*,video/*">
+          <input id="chatInput" placeholder="Message ${esc(profile?profile.name.split(' ')[0]:'')}…">
+          <button class="send-btn" id="chatSendBtn" disabled><svg class="icon"><use href="#i-send"/></svg></button>
+        </div>
+      `;
+      appEl.classList.add('chat-open');
+      contextPanel.style.display='flex';
+      renderChatList();
+      await renderThread(chatId);
 
-    if(chatSub) sb.removeChannel(chatSub);
-    chatSub = sb.channel('chat-'+chatId)
-      .on('postgres_changes', {event:'INSERT', schema:'public', table:'messages', filter:`chat_id=eq.${chatId}`}, ()=>{
-        renderThread(chatId); renderChatList();
-      })
-      .subscribe();
+      if(chatSub) sb.removeChannel(chatSub);
+      chatSub = sb.channel('chat-'+chatId)
+        .on('postgres_changes', {event:'INSERT', schema:'public', table:'messages', filter:`chat_id=eq.${chatId}`}, ()=>{
+          renderThread(chatId); renderChatList();
+        })
+        .subscribe();
 
-    const input = document.getElementById('chatInput');
-    const sendBtn = document.getElementById('chatSendBtn');
-    const fileInput = document.getElementById('chatFileInput');
-    let chatPendingFile=null, chatPendingType=null;
-    input.addEventListener('input', ()=>{ sendBtn.disabled = !input.value.trim() && !chatPendingFile; });
-    document.getElementById('chatAttachBtn').addEventListener('click', ()=>fileInput.click());
-    fileInput.addEventListener('change', e=>{
-      const f = e.target.files[0]; if(!f) return;
-      chatPendingFile = f;
-      chatPendingType = f.type.startsWith('video') ? 'video' : 'image';
-      sendBtn.disabled = false;
-      toast('Attachment ready — hit send');
-    });
-    async function send(){
-      const text = input.value.trim();
-      if(!text && !chatPendingFile) return;
-      sendBtn.disabled = true;
-      let mediaUrl=null, mediaType=null;
-      if(chatPendingFile){ mediaUrl = await uploadMedia(chatPendingFile); mediaType = chatPendingType; }
+      const input = document.getElementById('chatInput');
+      const sendBtn = document.getElementById('chatSendBtn');
+      const fileInput = document.getElementById('chatFileInput');
+      let chatPendingFile=null, chatPendingType=null;
+      input.addEventListener('input', ()=>{ sendBtn.disabled = !input.value.trim() && !chatPendingFile; });
+      document.getElementById('chatAttachBtn').addEventListener('click', ()=>fileInput.click());
+      fileInput.addEventListener('change', e=>{
+        const f = e.target.files[0]; if(!f) return;
+        chatPendingFile = f;
+        chatPendingType = f.type.startsWith('video') ? 'video' : 'image';
+        sendBtn.disabled = false;
+        toast('Attachment ready — hit send');
+      });
+      async function send(){
+        const text = input.value.trim();
+        if(!text && !chatPendingFile) return;
+        sendBtn.disabled = true;
+        let mediaUrl=null, mediaType=null;
+        if(chatPendingFile){ mediaUrl = await uploadMedia(chatPendingFile); mediaType = chatPendingType; }
       const {error} = await sb.from('messages').insert({chat_id:chatId, sender_id:ME.id, text, media_url:mediaUrl, media_type:mediaType});
       if(error){ toast('Send failed: '+error.message); }
       input.value=''; chatPendingFile=null;
       renderThread(chatId); renderChatList();
     }
-    sendBtn.addEventListener('click', send);
-    input.addEventListener('keydown', e=>{ if(e.key==='Enter') send(); });
+      sendBtn.addEventListener('click', send);
+      input.addEventListener('keydown', e=>{ if(e.key==='Enter') send(); });
+    } catch(err){
+      toast('Could not open chat: ' + (err.message || 'unknown error'));
+      appEl.classList.remove('chat-open');
+    }
   }
 
   async function renderThread(chatId){
