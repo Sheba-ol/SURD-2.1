@@ -89,6 +89,8 @@
   .notif-dot{position:absolute;top:6px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--alert);border:2px solid var(--panel);}
 
   .mainpane{width:400px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;}
+  .mainpane.force-hide{display:none;}
+  .context-panel.force-hide{display:none;}
   .pane-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
   .pane-title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:19px;letter-spacing:-0.3px;}
 
@@ -688,15 +690,17 @@
       const el = document.getElementById('view-'+v);
       if(el) el.classList.toggle('hidden', v!==view);
     });
-    appEl.classList.remove('chat-open');
+    mainpane.classList.remove('force-hide');
+    contextPanel.classList.remove('force-hide');
     if(view==='admin' || view==='profile'){
-      mainpane.style.display='none';
-      contextPanel.style.display='flex';
+      appEl.classList.remove('chat-open');
+      mainpane.classList.add('force-hide');
       if(view==='admin') renderAdmin();
       if(view==='profile') renderProfile();
     } else {
-      mainpane.style.display='flex';
-      mainpane.style.flexDirection='column';
+      if(view!=='chats' || !activeChatId){
+        appEl.classList.remove('chat-open');
+      }
       if(view==='feed'){
         contextPanel.innerHTML = emptyStateHTML('i-message','Select a chat','Pick a conversation from Messages, or open a profile to see more.');
       }
