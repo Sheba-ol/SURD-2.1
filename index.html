@@ -946,6 +946,12 @@
     return data;
   }
 
+  function updateActiveChialistItem(){
+    chatListEl.querySelectorAll('.chat-list-item[data-chat-id]').forEach(el=>{
+      el.classList.toggle('active', el.dataset.chatId === activeChatId);
+    });
+  }
+
   let chatListRendering = false;
   async function renderChatList(){
     if(chatListRendering) return;
@@ -966,6 +972,7 @@
         const streak = streakDays || 0;
         const div = document.createElement('div');
         div.className = 'chat-list-item' + (activeChatId===c.id ? ' active':'');
+        div.dataset.chatId = c.id;
         div.innerHTML = `
           <div class="avatar">${avatarInner(profile)}</div>
           <div class="chat-meta">
@@ -1020,7 +1027,7 @@
       appEl.classList.add('chat-open');
       contextPanel.style.display='flex';
       await renderThread(chatId);
-      renderChatList();
+      updateActiveChialistItem();
 
       if(chatSub) sb.removeChannel(chatSub);
       chatSub = sb.channel('chat-'+chatId)
