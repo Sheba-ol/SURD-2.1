@@ -756,7 +756,10 @@
         contextPanel.innerHTML = emptyStateHTML('i-message','Select a chat','Pick a conversation from Messages, or open a profile to see more.');
       }
       if(view==='chats'){
-        renderChatList();
+        const staleMs = 15000; // don't refetch if we rendered within the last 15s
+        if(!lastChatListRenderTime || Date.now()-lastChatListRenderTime > staleMs){
+          renderChatList();
+        }
         if(!activeChatId) contextPanel.innerHTML = emptyStateHTML('i-message','Select a chat','Pick a conversation on the left, or start a new one to begin chatting.');
       }
       if(view==='search'){ renderSearch(''); }
@@ -859,17 +862,26 @@
     try{
       const {data: posts, error} = await sb.from('posts').select('*').order('created_at', {ascending:false}).limit(50);
       if(error){ feedList.innerHTML = emptyStateHTML('i-home','Could not load feed', error.message); return; }
-      const {data: likes} = await sb.from('likes').select('*');
       feedList.innerHTML='';
       if(!posts || posts.length===0){
         feedList.innerHTML = emptyStateHTML('i-home','No posts yet','Be the first to post something.');
         return;
       }
+      const userIds = [...new Set(posts.map(p=>p.user_id))];
+      const [{data: likes}, {data: profilesBatch}, {data: adminsBatch}] = await Promise.all([
+        sb.from('likes').select('*'),
+        sb.from('profiles').select('*').in('id', userIds),
+        sb.from('admins').select('user_id').in('user_id', userIds)
+      ]);
+      (profilesBatch||[]).forEach(pr=>{ PROFILES_CACHE[pr.id] = pr; });
+      const adminIdSet = new Set((adminsBatch||[]).map(a=>a.user_id));
+
+      const frag = document.createDocumentFragment();
       for(const p of posts){
-        const profile = await getProfile(p.user_id);
+        const profile = PROFILES_CACHE[p.user_id];
         const myLikes = (likes||[]).filter(l=>l.post_id===p.id);
         const liked = myLikes.some(l=>l.user_id===ME.id);
-        const {data: authorAdmin} = await sb.from('admins').select('user_id').eq('user_id', p.user_id).maybeSingle();
+        const authorAdmin = adminIdSet.has(p.user_id);
         const div = document.createElement('div');
         div.className='post' + (authorAdmin ? ' admin-post' : '');
         let mediaHTML = '';
@@ -894,8 +906,9 @@
             </div>
           </div>
         `;
-        feedList.appendChild(div);
+        frag.appendChild(div);
       }
+      feedList.appendChild(frag);
       feedList.querySelectorAll('[data-like]').forEach(el=>{
         el.addEventListener('click', async ()=>{
           const id = el.dataset.like;
@@ -1008,6 +1021,7 @@
   }
 
   let chatListRendering = false;
+  let lastChatListRenderTime = 0;
   async function renderChatList(){
     if(chatListRendering) return;
     chatListRendering = true;
@@ -1018,13 +1032,23 @@
         chatListEl.innerHTML = emptyStateHTML('i-message','No chats yet','Start a new conversation to begin messaging.');
         return;
       }
-      for(const c of chats){
+      const otherIds = [...new Set(chats.map(c => c.user_a===ME.id ? c.user_b : c.user_a))];
+      const {data: profilesBatch} = await sb.from('profiles').select('*').in('id', otherIds);
+      (profilesBatch||[]).forEach(pr=>{ PROFILES_CACHE[pr.id] = pr; });
+
+      // fetch last message + streak for every chat in parallel instead of one-by-one
+      const rows = await Promise.all(chats.map(async c=>{
         const otherId = c.user_a===ME.id ? c.user_b : c.user_a;
-        const profile = await getProfile(otherId);
-        const {data: lastMsgs} = await sb.from('messages').select('*').eq('chat_id', c.id).order('created_at',{ascending:false}).limit(1);
-        const lm = lastMsgs && lastMsgs[0];
-        const {data: streakDays} = await sb.rpc('get_chat_streak', {p_chat_id: c.id, p_user_a: c.user_a, p_user_b: c.user_b});
-        const streak = streakDays || 0;
+        const [{data: lastMsgs}, {data: streakDays}] = await Promise.all([
+          sb.from('messages').select('*').eq('chat_id', c.id).order('created_at',{ascending:false}).limit(1),
+          sb.rpc('get_chat_streak', {p_chat_id: c.id, p_user_a: c.user_a, p_user_b: c.user_b})
+        ]);
+        return { c, otherId, lm: lastMsgs && lastMsgs[0], streak: streakDays || 0 };
+      }));
+
+      const frag = document.createDocumentFragment();
+      for(const {c, otherId, lm, streak} of rows){
+        const profile = PROFILES_CACHE[otherId];
         const div = document.createElement('div');
         div.className = 'chat-list-item' + (activeChatId===c.id ? ' active':'');
         div.dataset.chatId = c.id;
@@ -1042,8 +1066,10 @@
           </div>
         `;
         div.addEventListener('click', ()=>openChat(c.id, otherId));
-        chatListEl.appendChild(div);
+        frag.appendChild(div);
       }
+      chatListEl.appendChild(frag);
+      lastChatListRenderTime = Date.now();
     } finally {
       chatListRendering = false;
     }
