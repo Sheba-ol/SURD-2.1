@@ -282,6 +282,57 @@
     #app:not(.chat-open) .context-panel{display:none;}
     #app.chat-open .context-panel{display:flex;width:100%;}
   }
+
+  /* ---- Compact phone layout ---- */
+  @media(max-width:600px){
+    #app{flex-direction:column;}
+    .navrail{
+      width:100%;height:56px;flex-direction:row;padding:0 6px;gap:2px;
+      border-right:none;border-top:1px solid var(--border);
+      order:2;justify-content:space-around;align-items:center;
+    }
+    .logo{display:none;}
+    .navrail .nav-spacer{display:none;}
+    .navrail .nav-btn{width:40px;height:40px;}
+    .nav-avatar{width:32px;height:32px;font-size:12px;}
+    #logoutBtn{width:34px;height:34px;}
+    #logoutBtn .icon{width:17px;height:17px;}
+
+    .mainpane, .context-panel{order:1;flex:1;min-height:0;}
+    #app{height:100vh;}
+
+    .pane-header{padding:12px 14px;}
+    .pane-title{font-size:16px;}
+    .stories-rail{padding:10px 14px;gap:10px;}
+    .story-ring{width:46px;height:46px;}
+    .story-add{width:46px;height:46px;}
+    .story-label{font-size:10px;max-width:48px;}
+
+    .composer{padding:12px 14px;}
+    .composer textarea{font-size:14px;min-height:36px;}
+    .avatar{width:36px;height:36px;font-size:13px;}
+
+    .post{padding:12px 14px;gap:10px;}
+    .post-text{font-size:14px;}
+    .post-media{max-height:240px;}
+
+    .thread-header{padding:10px 14px;}
+    .thread-messages{padding:14px 16px;}
+    .thread-input{padding:10px 12px;}
+    .msg-row{max-width:82%;}
+
+    .admin-wrap, .profile-wrap{padding:16px 14px;}
+    .admin-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+    .stat-card{padding:12px;}
+    .stat-num{font-size:22px;}
+    .admin-table{font-size:12px;}
+    .admin-table th, .admin-table td{padding:8px 10px;font-size:12px;}
+
+    .chat-list-item{padding:11px 14px;}
+    .chat-preview{max-width:150px;}
+
+    .modal{padding:16px;width:94vw;}
+  }
 </style>
 </head>
 <body>
