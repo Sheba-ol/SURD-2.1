@@ -318,9 +318,9 @@
 
   @media(max-width:900px){
     .mainpane{width:100%;}
-    #app.chat-open .mainpane{display:none;}
-    #app:not(.chat-open) .context-panel{display:none;}
-    #app.chat-open .context-panel{display:flex;width:100%;}
+    #app.chat-open .mainpane, #app.detail-open .mainpane{display:none;}
+    #app:not(.chat-open):not(.detail-open) .context-panel{display:none;}
+    #app.chat-open .context-panel, #app.detail-open .context-panel{display:flex;width:100%;}
   }
 
   /* ---- Compact phone layout ---- */
@@ -818,10 +818,12 @@
     contextPanel.classList.remove('force-hide');
     if(view==='admin' || view==='profile'){
       appEl.classList.remove('chat-open');
+      appEl.classList.add('detail-open');
       mainpane.classList.add('force-hide');
       if(view==='admin') renderAdmin();
       if(view==='profile') renderProfile();
     } else {
+      appEl.classList.remove('detail-open');
       if(view!=='feed') activeThreadPostId = null;
       if(view!=='chats' || !activeChatId){
         if(!(view==='feed' && activeThreadPostId)) appEl.classList.remove('chat-open');
