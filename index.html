@@ -14,7 +14,7 @@
     --alert:#FF5C4D; --radius:10px;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;height:100vh;height:100dvh;overflow:hidden;-webkit-font-smoothing:antialiased;}
   .mono{font-family:'JetBrains Mono',monospace;}
   .display{font-family:'Space Grotesk',sans-serif;}
   ::selection{background:var(--accent-dim);color:#fff;}
@@ -29,7 +29,7 @@
 
   /* ---- Auth screens ---- */
   #authScreen{
-    height:100vh;width:100vw;display:flex;align-items:center;justify-content:center;
+    height:100vh;height:100dvh;width:100vw;display:flex;align-items:center;justify-content:center;
     background:radial-gradient(circle at 30% 20%,#0E1530 0%,#0B0D0E 60%);
   }
   .auth-card{width:380px;max-width:92vw;background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:32px;}
@@ -75,7 +75,7 @@
   @keyframes spin{to{transform:rotate(360deg);}}
 
   /* ---- App Shell ---- */
-  #app{display:none;height:100vh;width:100vw;}
+  #app{display:none;height:100vh;height:100dvh;width:100vw;}
   #app.visible{display:flex;}
   .navrail{width:76px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:6px;}
   .logo{width:40px;height:40px;display:flex;align-items:center;justify-content:center;margin-bottom:18px;}
@@ -339,7 +339,7 @@
     #logoutBtn .icon{width:17px;height:17px;}
 
     .mainpane, .context-panel{order:1;flex:1;min-height:0;}
-    #app{height:100vh;}
+    #app{height:100vh;height:100dvh;}
 
     .pane-header{padding:12px 14px;}
     .pane-title{font-size:16px;}
