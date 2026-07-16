@@ -293,6 +293,28 @@
   }
   .profile-save-row{display:flex;gap:10px;align-items:center;margin-top:8px;}
 
+  /* ---- Viewed user profile ---- */
+  .uprofile-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:18px;}
+  .uprofile-info{flex:1;min-width:0;}
+  .uprofile-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .uprofile-name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:19px;}
+  .uprofile-handle{font-size:13px;color:var(--text-dim);margin-top:2px;}
+  .uprofile-bio{font-size:13.5px;line-height:1.5;margin-top:10px;color:var(--text);}
+  .uprofile-stats{display:flex;gap:22px;margin:16px 0 4px;}
+  .uprofile-stat{display:flex;flex-direction:column;}
+  .uprofile-stat-num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;}
+  .uprofile-stat-label{font-size:11.5px;color:var(--text-dim);margin-top:1px;}
+  .follow-btn{
+    display:flex;align-items:center;gap:6px;padding:8px 18px;border-radius:20px;font-weight:600;font-size:13.5px;
+    background:var(--accent);color:#FFFFFF;transition:opacity .15s,background .15s,color .15s;margin-top:14px;
+  }
+  .follow-btn:hover{opacity:.88;}
+  .follow-btn.following{background:var(--panel-2);color:var(--text);border:1px solid var(--border);}
+  .follow-btn.following:hover{background:rgba(255,92,77,.1);color:var(--alert);border-color:rgba(255,92,77,.3);}
+  .follow-btn:disabled{opacity:.6;cursor:not-allowed;}
+  .uprofile-section-title{font-size:13px;font-weight:600;color:var(--text-dim);margin:22px 0 4px;text-transform:uppercase;letter-spacing:.4px;}
+  .uprofile-posts{border-top:1px solid var(--border);}
+
   .hidden{display:none !important;}
   input[type=file]{display:none;}
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--panel-2);border:1px solid var(--border);padding:10px 18px;border-radius:20px;font-size:13px;z-index:300;}
@@ -406,6 +428,8 @@
   <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></symbol>
   <symbol id="i-link" viewBox="0 0 24 24"><path d="M9.5 14.5l5-5"/><path d="M7 17l-1.5 1.5a3.5 3.5 0 0 1-5-5L4 12"/><path d="M17 7l1.5-1.5a3.5 3.5 0 0 1 5 5L22 12"/><path d="M14.5 6.5l-5 5"/></symbol>
   <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></symbol>
+  <symbol id="i-user-plus" viewBox="0 0 24 24"><circle cx="9.5" cy="8.2" r="3.4"/><path d="M2.8 19.5c1.1-3.4 3.7-5.4 6.7-5.4s5.6 2 6.7 5.4"/><path d="M18.5 8v6M21.5 11h-6"/></symbol>
+  <symbol id="i-user-check" viewBox="0 0 24 24"><circle cx="9.5" cy="8.2" r="3.4"/><path d="M2.8 19.5c1.1-3.4 3.7-5.4 6.7-5.4s5.6 2 6.7 5.4"/><path d="M16.5 11l2 2 4-4"/></symbol>
 </defs>
 </svg>
 
@@ -964,14 +988,14 @@
       <div class="repost-tag"><svg><use href="#i-repeat"/></svg>${esc(profile?profile.name:'Someone')} reposted</div>
     ` : '';
     return `
-      <div class="avatar" data-open-thread="${p.id}">${avatarInner(profile)}</div>
+      <div class="avatar" data-open-profile="${p.user_id}">${avatarInner(profile)}</div>
       <div class="post-body">
         ${repostTag}
-        <div class="post-head" data-open-thread="${p.id}">
-          <span class="post-name">${esc(profile?profile.name:'Unknown')}</span>
+        <div class="post-head">
+          <span class="post-name" data-open-profile="${p.user_id}">${esc(profile?profile.name:'Unknown')}</span>
           ${authorAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
-          <span class="post-handle mono">${esc(profile?profile.handle:'')}</span>
-          <span class="post-time mono">· ${timeAgo(p.created_at)}</span>
+          <span class="post-handle mono" data-open-profile="${p.user_id}">${esc(profile?profile.handle:'')}</span>
+          <span class="post-time mono" data-open-thread="${p.id}">· ${timeAgo(p.created_at)}</span>
         </div>
         <div data-open-thread="${p.id}">
           ${p.text ? `<div class="post-text">${esc(p.text)}</div>` : ''}
@@ -1046,6 +1070,12 @@
       el.addEventListener('click', (e)=>{
         e.stopPropagation();
         openThread(el.dataset.openThread);
+      });
+    });
+    container.querySelectorAll('[data-open-profile]').forEach(el=>{
+      el.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        openUserProfile(el.dataset.openProfile);
       });
     });
   }
@@ -1392,8 +1422,8 @@
       }
       contextPanel.innerHTML = `
         <div class="thread-header">
-          <div class="avatar">${avatarInner(profile)}</div>
-          <div style="flex:1;">
+          <div class="avatar" data-open-profile="${otherId}" style="cursor:pointer;">${avatarInner(profile)}</div>
+          <div style="flex:1;cursor:pointer;" data-open-profile="${otherId}">
             <div style="font-weight:600;font-size:14.5px;">${esc(profile?profile.name:'Unknown')}</div>
             <div style="font-size:12px;color:var(--text-dim)">${esc(profile?profile.handle:'')}</div>
           </div>
@@ -1409,6 +1439,9 @@
       `;
       appEl.classList.add('chat-open');
       contextPanel.style.display='flex';
+      contextPanel.querySelectorAll('[data-open-profile]').forEach(el=>{
+        el.addEventListener('click', ()=>openUserProfile(el.dataset.openProfile));
+      });
       await renderThread(chatId);
       updateActiveChialistItem();
 
@@ -1511,11 +1544,8 @@
       const row = document.createElement('div');
       row.className='chat-list-item';
       row.innerHTML = `<div class="avatar">${avatarInner(u)}</div><div class="chat-meta"><div class="chat-name">${esc(u.name)}</div><div class="chat-preview">${esc(u.handle)} · ${esc(u.bio||'')}</div></div>`;
-      row.addEventListener('click', async ()=>{
-        const chat = await findOrCreateChat(u.id);
-        if(!chat) return;
-        setActiveView('chats');
-        openChat(chat.id, u.id);
+      row.addEventListener('click', ()=>{
+        openUserProfile(u.id);
       });
       searchResults.appendChild(row);
     });
@@ -1592,6 +1622,160 @@
     } catch(err){
       console.error('renderProfile failed', err);
       contextPanel.innerHTML = `<div class="profile-wrap"><div class="pane-title" style="margin-bottom:10px;">Your Profile</div><div style="color:var(--alert);">Couldn't load profile: ${esc(err.message||'Unknown error')}</div></div>`;
+    }
+  }
+
+  // ============ VIEW USER PROFILE (other users) ============
+  let activeViewedProfileId = null;
+
+  async function openUserProfile(userId){
+    if(userId === ME.id){ setActiveView('profile'); return; }
+    activeViewedProfileId = userId;
+    appEl.classList.add('chat-open');
+    contextPanel.innerHTML = `<div class="empty-state"><div class="mono" style="font-size:13px;color:var(--text-dim);">Loading profile…</div></div>`;
+    await renderUserProfile(userId);
+  }
+
+  function closeUserProfile(){
+    activeViewedProfileId = null;
+    appEl.classList.remove('chat-open');
+    if(document.getElementById('view-feed') && !document.getElementById('view-feed').classList.contains('hidden')){
+      contextPanel.innerHTML = emptyStateHTML('i-message','Select a chat','Pick a conversation from Messages, or open a profile to see more.');
+    }
+  }
+
+  async function renderUserProfile(userId){
+    if(activeViewedProfileId !== userId) return;
+    try{
+      const {data: profile, error: pErr} = await sb.from('profiles').select('*').eq('id', userId).single();
+      if(pErr || !profile){
+        contextPanel.innerHTML = emptyStateHTML('i-user','Profile not found', pErr?pErr.message:'This user may no longer exist.');
+        return;
+      }
+      PROFILES_CACHE[userId] = profile;
+
+      const [
+        {count: postCount},
+        {count: followerCount},
+        {count: followingCount},
+        {data: myFollow},
+        {data: theirPosts, error: postsErr}
+      ] = await Promise.all([
+        sb.from('posts').select('*', {count:'exact', head:true}).eq('user_id', userId),
+        sb.from('follows').select('*', {count:'exact', head:true}).eq('following_id', userId),
+        sb.from('follows').select('*', {count:'exact', head:true}).eq('follower_id', userId),
+        sb.from('follows').select('*').eq('follower_id', ME.id).eq('following_id', userId),
+        sb.from('posts').select('*').eq('user_id', userId).order('created_at', {ascending:false}).limit(50)
+      ]);
+      if(postsErr) throw postsErr;
+
+      const postIds = (theirPosts||[]).map(p=>p.id);
+      let likesTotal = 0, likesByPost = {}, myLikedIds = new Set(), commentsByPost = {};
+      if(postIds.length){
+        const [{data: likes}, {data: comments}] = await Promise.all([
+          sb.from('likes').select('*').in('post_id', postIds),
+          sb.from('comments').select('post_id').in('post_id', postIds)
+        ]);
+        likesTotal = (likes||[]).length;
+        (likes||[]).forEach(l=>{
+          likesByPost[l.post_id] = (likesByPost[l.post_id]||0)+1;
+          if(l.user_id===ME.id) myLikedIds.add(l.post_id);
+        });
+        (comments||[]).forEach(c=>{ commentsByPost[c.post_id] = (commentsByPost[c.post_id]||0)+1; });
+      }
+      const {data: adminsBatch} = await sb.from('admins').select('user_id').eq('user_id', userId);
+      const isAuthorAdmin = (adminsBatch||[]).length>0;
+      const iFollow = (myFollow||[]).length>0;
+
+      if(activeViewedProfileId !== userId) return;
+
+      contextPanel.innerHTML = `
+        <div class="thread-header">
+          <button class="thread-back" id="uprofileBackBtn"><svg><use href="#i-back"/></svg></button>
+          <div class="thread-title">${esc(profile.name)}</div>
+        </div>
+        <div class="thread-scroll">
+          <div class="profile-wrap" style="padding:22px 20px;">
+            <div class="uprofile-header">
+              <div class="profile-avatar-big">${avatarInner(profile)}</div>
+              <div class="uprofile-info">
+                <div class="uprofile-name-row">
+                  <span class="uprofile-name">${esc(profile.name)}</span>
+                  ${isAuthorAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
+                </div>
+                <div class="uprofile-handle mono">${esc(profile.handle||'')}</div>
+                ${profile.bio ? `<div class="uprofile-bio">${esc(profile.bio)}</div>` : ''}
+                <button class="follow-btn ${iFollow?'following':''}" id="followBtn">
+                  <svg class="icon-sm"><use href="#${iFollow?'i-user-check':'i-user-plus'}"/></svg>
+                  <span id="followBtnLabel">${iFollow?'Following':'Follow'}</span>
+                </button>
+              </div>
+            </div>
+            <div class="uprofile-stats">
+              <div class="uprofile-stat"><span class="uprofile-stat-num" id="statPosts">${postCount||0}</span><span class="uprofile-stat-label">Posts</span></div>
+              <div class="uprofile-stat"><span class="uprofile-stat-num" id="statFollowers">${followerCount||0}</span><span class="uprofile-stat-label">Followers</span></div>
+              <div class="uprofile-stat"><span class="uprofile-stat-num">${followingCount||0}</span><span class="uprofile-stat-label">Following</span></div>
+              <div class="uprofile-stat"><span class="uprofile-stat-num">${likesTotal}</span><span class="uprofile-stat-label">Likes</span></div>
+            </div>
+          </div>
+          <div class="uprofile-section-title" style="padding:0 20px;">Posts</div>
+          <div class="uprofile-posts" id="uprofilePosts"></div>
+        </div>
+      `;
+      document.getElementById('uprofileBackBtn').addEventListener('click', closeUserProfile);
+
+      const followBtn = document.getElementById('followBtn');
+      followBtn.addEventListener('click', async ()=>{
+        followBtn.disabled = true;
+        const nowFollowing = followBtn.classList.contains('following');
+        try{
+          if(nowFollowing){
+            const {error} = await sb.from('follows').delete().eq('follower_id', ME.id).eq('following_id', userId);
+            if(error) throw error;
+          } else {
+            const {error} = await sb.from('follows').insert({follower_id: ME.id, following_id: userId});
+            if(error) throw error;
+          }
+          await renderUserProfile(userId);
+        } catch(err){
+          toast('Could not update follow: '+(err.message||'Unknown error'));
+        } finally {
+          followBtn.disabled = false;
+        }
+      });
+
+      const postsWrap = document.getElementById('uprofilePosts');
+      if(!theirPosts || theirPosts.length===0){
+        postsWrap.innerHTML = `<div style="padding:24px 20px;color:var(--text-dim);font-size:13.5px;">No posts yet.</div>`;
+      } else {
+        postsWrap.innerHTML='';
+        const frag = document.createDocumentFragment();
+        for(const p of theirPosts){
+          let sharedPost=null;
+          if(p.shared_post_id){
+            const {data: sp} = await sb.from('posts').select('*').eq('id', p.shared_post_id).single();
+            if(sp){
+              sharedPost = sp;
+              if(!PROFILES_CACHE[sp.user_id]) PROFILES_CACHE[sp.user_id] = await getProfile(sp.user_id);
+            }
+          }
+          const div = document.createElement('div');
+          div.className='post';
+          div.innerHTML = postHTML(p, {
+            profile, authorAdmin: isAuthorAdmin,
+            liked: myLikedIds.has(p.id), likeCount: likesByPost[p.id]||0,
+            commentCount: commentsByPost[p.id]||0,
+            reposted: p.user_id===ME.id && !!p.shared_post_id,
+            sharedPost
+          });
+          frag.appendChild(div);
+        }
+        postsWrap.appendChild(frag);
+        wirePostEvents(postsWrap, ()=>renderUserProfile(userId));
+      }
+    } catch(err){
+      console.error('renderUserProfile failed', err);
+      contextPanel.innerHTML = emptyStateHTML('i-user','Could not load profile', err.message||'Something went wrong loading this profile.');
     }
   }
 
