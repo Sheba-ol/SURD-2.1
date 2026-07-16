@@ -1084,11 +1084,12 @@
     activeThreadPostId = postId;
     appEl.classList.add('chat-open');
     contextPanel.innerHTML = `<div class="empty-state"><div class="mono" style="font-size:13px;color:var(--text-dim);">Loading thread…</div></div>`;
-    await renderThread(postId);
+    await renderPostThread(postId);
   }
 
-  async function renderThread(postId){
+  async function renderPostThread(postId){
     if(activeThreadPostId !== postId) return;
+    try{
     const {data: p, error} = await sb.from('posts').select('*').eq('id', postId).single();
     if(error || !p){
       contextPanel.innerHTML = emptyStateHTML('i-message','Post not found', error?error.message:'This post may have been deleted.');
@@ -1099,7 +1100,8 @@
       const {data: sp} = await sb.from('posts').select('*').eq('id', p.shared_post_id).single();
       if(sp) { userIds.add(sp.user_id); PROFILES_CACHE['__shared_'+p.id] = sp; }
     }
-    const {data: comments} = await sb.from('comments').select('*').eq('post_id', postId).order('created_at', {ascending:true});
+    const {data: comments, error: commentsErr} = await sb.from('comments').select('*').eq('post_id', postId).order('created_at', {ascending:true});
+    if(commentsErr) throw commentsErr;
     (comments||[]).forEach(c=>userIds.add(c.user_id));
     const {data: likes} = await sb.from('likes').select('*').eq('post_id', postId);
     const missingIds = [...userIds].filter(id=>!PROFILES_CACHE[id]);
@@ -1140,7 +1142,7 @@
       reposted: p.user_id===ME.id && !!p.shared_post_id,
       sharedPost
     });
-    wirePostEvents(opWrap, ()=>renderThread(postId));
+    wirePostEvents(opWrap, ()=>renderPostThread(postId));
 
     const repliesEl = document.getElementById('threadReplies');
     if(!comments || comments.length===0){
@@ -1183,9 +1185,13 @@
       const {error: cErr} = await sb.from('comments').insert({post_id: postId, user_id: ME.id, text});
       if(cErr){ toast('Reply failed: '+cErr.message); replySendBtn.disabled=false; return; }
       replyInput.value=''; replyInput.style.height='auto';
-      await renderThread(postId);
+      await renderPostThread(postId);
       if(document.getElementById('view-feed') && !document.getElementById('view-feed').classList.contains('hidden')) renderFeed();
     });
+    } catch(err){
+      console.error('renderPostThread failed', err);
+      contextPanel.innerHTML = emptyStateHTML('i-message','Could not load thread', err.message||'Something went wrong loading replies. This may mean the comments table hasn\'t been created yet.');
+    }
   }
 
   // ============ STORIES ============
@@ -1486,6 +1492,7 @@
 
   // ============ PROFILE ============
   async function renderProfile(){
+    try{
     const profile = await getProfile(ME.id) || MY_PROFILE;
     contextPanel.innerHTML = `
       <div class="profile-wrap">
@@ -1551,6 +1558,10 @@
       renderProfile();
       setTimeout(()=>{ const m=document.getElementById('profileSaveMsg'); if(m) m.innerText=''; }, 2500);
     });
+    } catch(err){
+      console.error('renderProfile failed', err);
+      contextPanel.innerHTML = `<div class="profile-wrap"><div class="pane-title" style="margin-bottom:10px;">Your Profile</div><div style="color:var(--alert);">Couldn't load profile: ${esc(err.message||'Unknown error')}</div></div>`;
+    }
   }
 
   // ============ ADMIN ============
@@ -1559,15 +1570,21 @@
       contextPanel.innerHTML = `<div class="admin-wrap"><div class="pane-title" style="margin-bottom:10px;">Admin Panel</div><div style="color:var(--text-dim);">This account doesn't have admin access.</div></div>`;
       return;
     }
-    const [{count: userCount}, {count: postCount}, {count: msgCount}, {data: reports}] = await Promise.all([
+    contextPanel.innerHTML = `<div class="empty-state"><div class="mono" style="font-size:13px;color:var(--text-dim);">Loading admin panel…</div></div>`;
+    try{
+    const [{count: userCount}, {count: postCount}, {count: msgCount}, {data: reports, error: reportsErr}] = await Promise.all([
       sb.from('profiles').select('*', {count:'exact', head:true}),
       sb.from('posts').select('*', {count:'exact', head:true}),
       sb.from('messages').select('*', {count:'exact', head:true}),
       sb.from('reports').select('*').order('created_at',{ascending:false})
     ]);
-    const {data: users} = await sb.from('profiles').select('*');
-    const {data: posts} = await sb.from('posts').select('*').order('created_at',{ascending:false}).limit(50);
-    const {data: notifs} = await sb.from('notifications').select('*').order('created_at',{ascending:false}).limit(20);
+    if(reportsErr) throw reportsErr;
+    const {data: users, error: usersErr} = await sb.from('profiles').select('*');
+    if(usersErr) throw usersErr;
+    const {data: posts, error: postsErr} = await sb.from('posts').select('*').order('created_at',{ascending:false}).limit(50);
+    if(postsErr) throw postsErr;
+    const {data: notifs, error: notifsErr} = await sb.from('notifications').select('*').order('created_at',{ascending:false}).limit(20);
+    if(notifsErr) throw notifsErr;
 
     contextPanel.innerHTML = `
       <div class="admin-wrap">
@@ -1666,6 +1683,10 @@
           renderAdmin();
         });
       });
+    }
+    } catch(err){
+      console.error('renderAdmin failed', err);
+      contextPanel.innerHTML = `<div class="admin-wrap"><div class="pane-title" style="margin-bottom:10px;">Admin Panel</div><div style="color:var(--alert);">Couldn't load admin data: ${esc(err.message||'Unknown error')}</div></div>`;
     }
   }
 
