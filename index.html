@@ -630,7 +630,11 @@
   function setMsg(elId, text, type){
     const el = document.getElementById(elId);
     if(!text){ el.innerHTML=''; return; }
-    el.innerHTML = `<div class="auth-${type}">${esc(text)}</div>`;
+    let str = text;
+    if(typeof str !== 'string'){
+      str = (str && str.message) ? str.message : 'Something went wrong. Please try again.';
+    }
+    el.innerHTML = `<div class="auth-${type}">${esc(str)}</div>`;
   }
   function setLoading(btn, loading, label){
     btn.disabled = loading;
@@ -649,12 +653,25 @@
     if(!handle.startsWith('@')) handle = '@'+handle;
     const btn = document.getElementById('signupBtn');
     setLoading(btn, true);
-    const {data, error} = await sb.auth.signUp({ email, password, options: { data: { name, handle } } });
-    setLoading(btn, false, 'Sign up');
-    if(error){ setMsg('signupMsg', error.message, 'error'); return; }
-    if(data.user && !data.session){
+    try{
+      const {data, error} = await sb.auth.signUp({ email, password, options: { data: { name, handle } } });
+      setLoading(btn, false, 'Sign up');
+      if(error){ setMsg('signupMsg', error.message || 'Could not create account.', 'error'); return; }
+      if(!data || !data.user){ setMsg('signupMsg','Could not create account. Please try again.','error'); return; }
+      if(data.user.identities && data.user.identities.length===0){
+        setMsg('signupMsg','An account with this email already exists. Try logging in instead.','error');
+        return;
+      }
+      if(data.session){
+        // Email confirmation is off — user is signed in immediately.
+        setMsg('signupMsg','Account created!','success');
+        return; // onAuthStateChange / getSession flow will boot the app
+      }
       setMsg('signupMsg','Account created! Check your email to confirm, then log in.','success');
       setTimeout(()=>showForm('Login'), 2500);
+    } catch(err){
+      setLoading(btn, false, 'Sign up');
+      setMsg('signupMsg', (err && err.message) ? err.message : 'Network error. Please try again.', 'error');
     }
   });
 
@@ -665,9 +682,21 @@
     if(!email || !password){ setMsg('loginMsg','Enter your email and password.','error'); return; }
     const btn = document.getElementById('loginBtn');
     setLoading(btn, true);
-    const {error} = await sb.auth.signInWithPassword({email, password});
-    setLoading(btn, false, 'Log in');
-    if(error){ setMsg('loginMsg', error.message, 'error'); return; }
+    try{
+      const {error} = await sb.auth.signInWithPassword({email, password});
+      setLoading(btn, false, 'Log in');
+      if(error){
+        if(/email not confirmed/i.test(error.message||'')){
+          setMsg('loginMsg','Your email address hasn\'t been confirmed yet. Please check your inbox for the confirmation link.','error');
+        } else {
+          setMsg('loginMsg', error.message || 'Could not log in.', 'error');
+        }
+        return;
+      }
+    } catch(err){
+      setLoading(btn, false, 'Log in');
+      setMsg('loginMsg', (err && err.message) ? err.message : 'Network error. Please try again.', 'error');
+    }
   });
 
   document.getElementById('forgotBtn').addEventListener('click', async ()=>{
